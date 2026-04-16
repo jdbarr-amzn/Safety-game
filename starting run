@@ -1,0 +1,3 @@
+cd /workspace/safety-game
+git remote add origin https://github.com/jdbarr-amzn/safety-game.git
+git push -u origin main
