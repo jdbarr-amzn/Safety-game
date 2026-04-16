@@ -33,10 +33,10 @@ button:hover { background: #c73652; }
 #answers button:hover { background: #533483; }
 .correct { background: #2ecc71 !important; border-color: #27ae60 !important; }
 .wrong { background: #e74c3c !important; border-color: #c0392b !important; }
-#leaderboard-list { list-style: none; width: 70%; max-width: 400px; margin-bottom: 10px; overflow-y: auto; flex-shrink: 1; }
+#leaderboard-list { list-style: none; width: 70%; max-width: 400px; margin-bottom: 10px; overflow-y: auto; max-height: 340px; }
 #leaderboard-list li { padding: 5px 16px; margin: 3px 0; background: #0f3460; border-radius: 4px; display: flex; justify-content: space-between; font-size: 14px; }
 #leaderboard-list li:nth-child(-n+3) { background: #533483; }
-#leaderboard-screen.overlay { padding: 15px 0; }
+#leaderboard-screen.overlay { padding: 15px 0; justify-content: flex-start; padding-top: 30px; }
 #leaderboard-screen h2 { margin-bottom: 10px; }
 #leaderboard-screen button { flex-shrink: 0; }
 #effects { position: absolute; top: 40px; left: 10px; color: #fff; font-size: 14px; pointer-events: none; z-index: 10; }
