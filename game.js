@@ -670,22 +670,11 @@ const useFirebase = typeof db !== "undefined";
 
 function saveScore(name, sc) {
   if (useFirebase) {
-    // Use player name as key — only keep their best score
-    const ref = db.ref("leaderboard/" + encodeURIComponent(name).replace(/\./g, "_"));
-    ref.once("value", snap => {
-      const existing = snap.val();
-      if (!existing || sc > existing.score) {
-        ref.set({ name, score: sc, timestamp: Date.now() });
-      }
-    });
+    // Each play is a separate entry, ranked by score
+    db.ref("leaderboard").push({ name, score: sc, timestamp: Date.now() });
   } else {
     const lb = JSON.parse(localStorage.getItem("safetyHeroScores") || "[]");
-    const idx = lb.findIndex(e => e.name === name);
-    if (idx >= 0) {
-      if (sc > lb[idx].score) lb[idx].score = sc;
-    } else {
-      lb.push({ name, score: sc });
-    }
+    lb.push({ name, score: sc });
     lb.sort((a, b) => b.score - a.score);
     localStorage.setItem("safetyHeroScores", JSON.stringify(lb.slice(0, 10)));
   }
