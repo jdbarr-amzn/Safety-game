@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safety Hero - Workplace Safety Platformer</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #1a1a2e; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: 'Segoe UI', sans-serif; }
+#game-container { position: relative; width: 800px; height: 500px; border: 3px solid #e94560; border-radius: 8px; overflow: hidden; }
+canvas { display: block; }
+#hud {
+  position: absolute; top: 0; left: 0; right: 0;
+  padding: 8px 16px; color: #fff; font-size: 16px; font-weight: bold;
+  display: flex; justify-content: space-between; pointer-events: none;
+  text-shadow: 1px 1px 2px #000; z-index: 10;
+}
+.overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: rgba(22, 33, 62, 0.95); color: #fff; z-index: 20;
+}
+.overlay.hidden { display: none; }
+.overlay h1 { font-size: 48px; margin-bottom: 10px; }
+.overlay h2 { font-size: 28px; margin-bottom: 20px; text-align: center; padding: 0 20px; }
+.overlay p { font-size: 18px; margin-bottom: 20px; text-align: center; padding: 0 30px; color: #ccc; }
+input { padding: 10px 20px; font-size: 18px; border: 2px solid #e94560; border-radius: 6px; background: #0f3460; color: #fff; text-align: center; margin-bottom: 15px; outline: none; }
+input::placeholder { color: #888; }
+button { padding: 12px 30px; font-size: 18px; border: none; border-radius: 6px; cursor: pointer; margin: 5px; background: #e94560; color: #fff; font-weight: bold; transition: background 0.2s; }
+button:hover { background: #c73652; }
+#answers { display: flex; flex-direction: column; gap: 10px; width: 80%; max-width: 500px; }
+#answers button { text-align: left; padding: 12px 20px; background: #0f3460; border: 2px solid #533483; }
+#answers button:hover { background: #533483; }
+.correct { background: #2ecc71 !important; border-color: #27ae60 !important; }
+.wrong { background: #e74c3c !important; border-color: #c0392b !important; }
+#leaderboard-list { list-style: none; width: 70%; max-width: 400px; margin-bottom: 10px; overflow-y: auto; flex-shrink: 1; }
+#leaderboard-list li { padding: 5px 16px; margin: 3px 0; background: #0f3460; border-radius: 4px; display: flex; justify-content: space-between; font-size: 14px; }
+#leaderboard-list li:nth-child(-n+3) { background: #533483; }
+#leaderboard-screen.overlay { padding: 15px 0; }
+#leaderboard-screen h2 { margin-bottom: 10px; }
+#leaderboard-screen button { flex-shrink: 0; }
+#effects { position: absolute; top: 40px; left: 10px; color: #fff; font-size: 14px; pointer-events: none; z-index: 10; }
+#controls-legend { display: flex; gap: 16px; margin-bottom: 15px; color: #aaa; font-size: 13px; }
+#controls-legend span { background: #0f3460; padding: 5px 12px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div id="game-container">
+  <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+  <div id="hud" class="hidden">
+    <span id="score-display">Score: 0</span>
+    <span id="lives-display">❤️❤️❤️</span>
+    <span id="level-display">Level 1</span>
+  </div>
+  <div id="effects"></div>
+
+  <div id="menu-screen" class="overlay">
+    <h1>🦺 Safety Hero</h1>
+    <p>Navigate workplace hazards, answer safety questions, and collect power-ups!</p>
+    <div id="controls-legend">
+      <span>⬅️➡️ / A D — Move</span>
+      <span>⬆️ / W / Space — Jump</span>
+      <span>⚠️ Touch signs for safety quiz</span>
+    </div>
+    <input id="player-name" placeholder="Enter your name" maxlength="15">
+    <button id="start-btn">Start Game</button>
+    <button id="leaderboard-btn">Leaderboard</button>
+  </div>
+
+  <div id="question-screen" class="overlay hidden">
+    <h2 id="question-text"></h2>
+    <div id="answers"></div>
+  </div>
+
+  <div id="gameover-screen" class="overlay hidden">
+    <h2>Game Over!</h2>
+    <p id="final-score"></p>
+    <button id="restart-btn">Play Again</button>
+    <button id="go-leaderboard-btn">Leaderboard</button>
+    <button id="go-menu-btn">Main Menu</button>
+  </div>
+
+  <div id="leaderboard-screen" class="overlay hidden">
+    <h2>🏆 Leaderboard</h2>
+    <ol id="leaderboard-list"></ol>
+    <button id="back-btn">Back to Menu</button>
+  </div>
+</div>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
