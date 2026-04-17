@@ -685,21 +685,22 @@ function renderLeaderboard() {
   const list = document.getElementById("leaderboard-list");
 
   function displayScores(entries) {
-    list.innerHTML = entries.length
-      ? entries.map((e, i) => {
-          const prefix = i < 3 ? medals[i] + " " : (i + 1) + ". ";
-          return "<li><span>" + prefix + e.name + "</span><span>" + e.score + " pts</span></li>";
-        }).join("")
-      : "<li>No scores yet!</li>";
+    console.log("Leaderboard entries:", entries.length, entries);
+    let html = "";
+    for (let i = 0; i < entries.length; i++) {
+      const prefix = i < 3 ? medals[i] + " " : (i + 1) + ". ";
+      html += "<li><span>" + prefix + entries[i].name + "</span><span>" + entries[i].score + " pts</span></li>";
+    }
+    list.innerHTML = html || "<li>No scores yet!</li>";
   }
 
   if (useFirebase) {
     list.innerHTML = "<li>Loading...</li>";
     showScreen("leaderboard");
-    db.ref("leaderboard").orderByChild("score").limitToLast(10).once("value", snap => {
+    db.ref("leaderboard").orderByChild("score").limitToLast(10).once("value", function(snap) {
       const entries = [];
-      snap.forEach(child => entries.push(child.val()));
-      entries.sort((a, b) => b.score - a.score);
+      snap.forEach(function(child) { entries.push(child.val()); });
+      entries.sort(function(a, b) { return b.score - a.score; });
       displayScores(entries);
     });
   } else {
