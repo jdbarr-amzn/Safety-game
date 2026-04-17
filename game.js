@@ -685,7 +685,7 @@ function renderLeaderboard() {
   const list = document.getElementById("leaderboard-list");
 
   function displayScores(entries) {
-    console.log("Leaderboard entries:", entries.length, entries);
+    console.log("Leaderboard entries:", entries.length);
     let html = "";
     for (let i = 0; i < entries.length; i++) {
       const prefix = i < 3 ? medals[i] + " " : (i + 1) + ". ";
