@@ -15,7 +15,7 @@ const QUESTIONS = [
 ];
 
 const HAZARD_TYPES = [
-  { name: "Wet Floor", emoji: "💧", color: "#3498db" },
+  { name: "Wet Floor", emoji: "💧", color: "#3498db", sprite: "hazard-wetfloor", patrols: true },
   { name: "Electrical", emoji: "⚡", color: "#f1c40f" },
   { name: "Chemical Spill", emoji: "☣️", color: "#2ecc71" },
   { name: "Falling Objects", emoji: "📦", color: "#e67e22" },
@@ -49,6 +49,7 @@ const SPRITE_DEFS = {
   "player-run":    { src: "sprites/player-run.png",    cols: 5, rows: 5, fw: 396, fh: 534, frames: 25 },
   "player-jump":   { src: "sprites/player-jump.png",   cols: 5, rows: 5, fw: 324, fh: 610, frames: 25 },
   "player-shield": { src: "sprites/player-shield.png", cols: 5, rows: 5, fw: 252, fh: 520, frames: 25 },
+  "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 5, rows: 5, fw: 256, fh: 256, frames: 25 },
 };
 const ANIM_SPEED = 0.4; // frames per game tick
 
@@ -162,7 +163,13 @@ function generateLevel(lvl) {
   for (let x = 500; x < goalX - 100; x += 200 + Math.random() * 300) {
     if (!hasGround(x)) continue;
     const ht = HAZARD_TYPES[Math.floor(Math.random() * HAZARD_TYPES.length)];
-    hazards.push({ x, y: groundY - 30, w: 30, h: 30, type: ht, timer: Math.random() * 6 });
+    const h = { x, y: groundY - 30, w: 30, h: 30, type: ht, timer: Math.random() * 6, facing: 1 };
+    if (ht.patrols) {
+      h.originX = x;
+      h.patrolRange = 60 + Math.random() * 60;
+      h.patrolSpeed = 0.5 + Math.random() * 0.5;
+    }
+    hazards.push(h);
   }
 
   // Power-ups
@@ -287,6 +294,12 @@ function update() {
   for (let i = hazards.length - 1; i >= 0; i--) {
     const h = hazards[i];
     h.timer += 0.05;
+    // Patrol movement
+    if (h.originX !== undefined) {
+      h.x += h.patrolSpeed * h.facing;
+      if (h.x > h.originX + h.patrolRange) h.facing = -1;
+      if (h.x < h.originX - h.patrolRange) h.facing = 1;
+    }
     if (overlap(player, h)) {
       if (player.shielded) {
         player.shielded = false;
@@ -541,18 +554,37 @@ function draw() {
 
   // Hazards
   for (const h of hazards) {
-    ctx.font = "24px serif";
-    ctx.fillText(h.type.emoji, h.x, h.y + 24);
-    const pulse = Math.sin(h.timer * 3) * 0.3 + 0.7;
-    ctx.globalAlpha = pulse;
-    ctx.fillStyle = h.type.color;
-    ctx.beginPath();
-    ctx.moveTo(h.x + 15, h.y - 10);
-    ctx.lineTo(h.x + 5, h.y + 2);
-    ctx.lineTo(h.x + 25, h.y + 2);
-    ctx.closePath();
-    ctx.fill();
-    ctx.globalAlpha = 1;
+    const def = h.type.sprite ? SPRITE_DEFS[h.type.sprite] : null;
+    const spr = h.type.sprite ? sprites[h.type.sprite] : null;
+
+    if (spr && def) {
+      // Animated sprite
+      const frameIdx = Math.floor(h.timer * 8) % def.frames;
+      const col = frameIdx % def.cols;
+      const row = Math.floor(frameIdx / def.cols);
+      const drawSize = 44;
+      ctx.save();
+      ctx.translate(h.x + h.w / 2, h.y + h.h / 2);
+      ctx.scale(h.facing || 1, 1);
+      ctx.drawImage(spr,
+        col * def.fw, row * def.fh, def.fw, def.fh,
+        -drawSize / 2, -drawSize / 2, drawSize, drawSize);
+      ctx.restore();
+    } else {
+      // Emoji fallback
+      ctx.font = "24px serif";
+      ctx.fillText(h.type.emoji, h.x, h.y + 24);
+      const pulse = Math.sin(h.timer * 3) * 0.3 + 0.7;
+      ctx.globalAlpha = pulse;
+      ctx.fillStyle = h.type.color;
+      ctx.beginPath();
+      ctx.moveTo(h.x + 15, h.y - 10);
+      ctx.lineTo(h.x + 5, h.y + 2);
+      ctx.lineTo(h.x + 25, h.y + 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
   }
 
   // Power-ups
