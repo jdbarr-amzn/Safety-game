@@ -15,7 +15,7 @@ const QUESTIONS = [
 ];
 
 const HAZARD_TYPES = [
-  { name: "Wet Floor", emoji: "💧", color: "#3498db", sprite: "hazard-wetfloor", patrols: true },
+  { name: "Wet Floor", emoji: "💧", color: "#3498db", sprite: "hazard-wetfloor" },
   { name: "Electrical", emoji: "⚡", color: "#f1c40f" },
   { name: "Chemical Spill", emoji: "☣️", color: "#2ecc71" },
   { name: "Fire", emoji: "🔥", color: "#e74c3c" },
