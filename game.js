@@ -559,7 +559,7 @@ function draw() {
       const frameIdx = Math.floor(h.timer * 8) % def.frames;
       const col = frameIdx % def.cols;
       const row = Math.floor(frameIdx / def.cols);
-      const drawSize = 75;
+      const drawSize = 113;
       // First half of frames face right, second half face left
       const frameFacing = frameIdx < def.frames / 2 ? 1 : -1;
       ctx.save();
