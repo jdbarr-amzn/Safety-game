@@ -559,11 +559,11 @@ function draw() {
       const frameIdx = Math.floor(h.timer * 8) % def.frames;
       const col = frameIdx % def.cols;
       const row = Math.floor(frameIdx / def.cols);
-      const drawSize = 58;
+      const drawSize = 75;
       // First half of frames face right, second half face left
       const frameFacing = frameIdx < def.frames / 2 ? 1 : -1;
       ctx.save();
-      ctx.translate(h.x + h.w / 2, h.y + h.h / 2 + 8);
+      ctx.translate(h.x + h.w / 2, h.y + h.h / 2 + 14);
       ctx.scale(frameFacing, 1);
       ctx.drawImage(spr,
         col * def.fw, row * def.fh, def.fw, def.fh,
