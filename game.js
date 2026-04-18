@@ -450,72 +450,70 @@ function answerQuestion(idx, btn) {
 }
 
 // ── Drawing ──
-function draw() {
-  ctx.clearRect(0, 0, W, H);
+// ── Cached background ──
+let bgCanvas = null;
+function drawCachedBackground() {
+  if (!bgCanvas) {
+    bgCanvas = document.createElement("canvas");
+    bgCanvas.width = W;
+    bgCanvas.height = H;
+    const bg = bgCanvas.getContext("2d");
 
-  // Warehouse ceiling/wall gradient
-  const grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, "#3a3a3a");
-  grad.addColorStop(0.15, "#4a4a4a");
-  grad.addColorStop(1, "#2a2a2a");
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, W, H);
+    // Warehouse ceiling/wall gradient
+    const grad = bg.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, "#3a3a3a");
+    grad.addColorStop(0.15, "#4a4a4a");
+    grad.addColorStop(1, "#2a2a2a");
+    bg.fillStyle = grad;
+    bg.fillRect(0, 0, W, H);
 
-  // Ceiling beams
-  ctx.fillStyle = "#333";
-  for (let i = 0; i < 20; i++) {
-    const bx = i * 160 - (cameraX * 0.05) % 160;
-    ctx.fillRect(bx, 0, 8, 30);
-    ctx.fillRect(bx - 20, 28, 48, 4);
+    // Ceiling beams
+    bg.fillStyle = "#333";
+    for (let i = 0; i < 20; i++) {
+      const bx = i * 160;
+      bg.fillRect(bx, 0, 8, 30);
+      bg.fillRect(bx - 20, 28, 48, 4);
+    }
+
+    // Warehouse floor line
+    bg.fillStyle = "#e8c840";
+    bg.fillRect(0, H - 42, W, 3);
   }
+  ctx.drawImage(bgCanvas, 0, 0);
+}
+
+function draw() {
+  drawCachedBackground();
 
   // Back wall — far racking (slow parallax)
   ctx.fillStyle = "#444";
-  for (let i = 0; i < 16; i++) {
+  for (let i = 0; i < 10; i++) {
     const rx = i * 140 - (cameraX * 0.1) % 140;
-    // Upright posts
     ctx.fillRect(rx, 60, 6, H - 100);
     ctx.fillRect(rx + 80, 60, 6, H - 100);
-    // Shelves
     ctx.fillStyle = "#555";
-    for (let s = 0; s < 4; s++) {
-      const sy = 80 + s * 80;
+    for (let s = 0; s < 3; s++) {
+      const sy = 80 + s * 100;
       ctx.fillRect(rx, sy, 86, 5);
-      // Boxes on shelves
       ctx.fillStyle = "#8B6914";
-      const bw = 18 + (i * 7 + s * 13) % 12;
-      ctx.fillRect(rx + 10 + (s * 17 % 30), sy - bw + 2, bw, bw - 2);
-      ctx.fillStyle = "#A0522D";
-      ctx.fillRect(rx + 45 + (s * 11 % 20), sy - 14, 16, 12);
+      ctx.fillRect(rx + 10 + (s * 17 % 30), sy - 18, 22, 16);
       ctx.fillStyle = "#555";
     }
     ctx.fillStyle = "#444";
   }
 
   // Mid racking (medium parallax)
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 8; i++) {
     const rx = i * 180 - (cameraX * 0.25) % 180;
-    // Orange upright posts
     ctx.fillStyle = "#d35400";
     ctx.fillRect(rx, 100, 8, H - 140);
     ctx.fillRect(rx + 100, 100, 8, H - 140);
-    // Blue shelf beams
     ctx.fillStyle = "#2c6fbb";
     for (let s = 0; s < 3; s++) {
       const sy = 140 + s * 100;
       ctx.fillRect(rx, sy, 108, 6);
-      // Pallets/boxes
-      ctx.fillStyle = "#c8a96e";
-      ctx.fillRect(rx + 12, sy - 30, 35, 28);
-      ctx.fillStyle = "#a0522d";
-      ctx.fillRect(rx + 55, sy - 22, 28, 20);
-      ctx.fillStyle = "#2c6fbb";
     }
   }
-
-  // Warehouse floor line
-  ctx.fillStyle = "#e8c840";
-  ctx.fillRect(0, H - 42, W, 3);
 
   ctx.save();
   ctx.translate(-cameraX, 0);
