@@ -562,9 +562,9 @@ function draw() {
       const frameIdx = Math.floor(h.timer * 8) % def.frames;
       const col = frameIdx % def.cols;
       const row = Math.floor(frameIdx / def.cols);
-      const drawSize = 44;
+      const drawSize = 48;
       ctx.save();
-      ctx.translate(h.x + h.w / 2, h.y + h.h / 2);
+      ctx.translate(h.x + h.w / 2, h.y + h.h / 2 + 8);
       ctx.scale(h.facing || 1, 1);
       ctx.drawImage(spr,
         col * def.fw, row * def.fh, def.fw, def.fh,
