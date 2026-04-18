@@ -48,7 +48,7 @@ const SPRITE_DEFS = {
   "player-run":    { src: "sprites/player-run.png",    cols: 5, rows: 5, fw: 396, fh: 534, frames: 25 },
   "player-jump":   { src: "sprites/player-jump.png",   cols: 5, rows: 5, fw: 324, fh: 610, frames: 25 },
   "player-shield": { src: "sprites/player-shield.png", cols: 5, rows: 5, fw: 252, fh: 520, frames: 25 },
-  "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 5, rows: 5, fw: 256, fh: 256, frames: 25 },
+  "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1 },
 };
 const ANIM_SPEED = 0.4; // frames per game tick
 
@@ -293,14 +293,11 @@ function update() {
   for (let i = hazards.length - 1; i >= 0; i--) {
     const h = hazards[i];
     h.timer += 0.05;
-    // Patrol movement — direction follows animation frames
+    // Patrol movement
     if (h.originX !== undefined) {
-      const def = h.type.sprite ? SPRITE_DEFS[h.type.sprite] : null;
-      if (def) {
-        const frameIdx = Math.floor(h.timer * 8) % def.frames;
-        h.facing = frameIdx < def.frames / 2 ? 1 : -1;
-      }
       h.x += h.patrolSpeed * h.facing;
+      if (h.x > h.originX + h.patrolRange) h.facing = -1;
+      if (h.x < h.originX - h.patrolRange) h.facing = 1;
     }
     if (overlap(player, h)) {
       if (player.shielded) {
