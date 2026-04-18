@@ -293,11 +293,14 @@ function update() {
   for (let i = hazards.length - 1; i >= 0; i--) {
     const h = hazards[i];
     h.timer += 0.05;
-    // Patrol movement
+    // Patrol movement — direction follows animation frames
     if (h.originX !== undefined) {
+      const def = h.type.sprite ? SPRITE_DEFS[h.type.sprite] : null;
+      if (def) {
+        const frameIdx = Math.floor(h.timer * 8) % def.frames;
+        h.facing = frameIdx < def.frames / 2 ? 1 : -1;
+      }
       h.x += h.patrolSpeed * h.facing;
-      if (h.x > h.originX + h.patrolRange) h.facing = -1;
-      if (h.x < h.originX - h.patrolRange) h.facing = 1;
     }
     if (overlap(player, h)) {
       if (player.shielded) {
@@ -557,14 +560,16 @@ function draw() {
     const spr = h.type.sprite ? sprites[h.type.sprite] : null;
 
     if (spr && def) {
-      // Animated sprite
+      // Animated sprite — facing synced to frame cycle
       const frameIdx = Math.floor(h.timer * 8) % def.frames;
       const col = frameIdx % def.cols;
       const row = Math.floor(frameIdx / def.cols);
-      const drawSize = 48;
+      const drawSize = 58;
+      // First half of frames face right, second half face left
+      const frameFacing = frameIdx < def.frames / 2 ? 1 : -1;
       ctx.save();
       ctx.translate(h.x + h.w / 2, h.y + h.h / 2 + 8);
-      ctx.scale(h.facing || 1, 1);
+      ctx.scale(frameFacing, 1);
       ctx.drawImage(spr,
         col * def.fw, row * def.fh, def.fw, def.fh,
         -drawSize / 2, -drawSize / 2, drawSize, drawSize);
