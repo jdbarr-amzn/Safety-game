@@ -434,7 +434,9 @@ function advanceLevel() {
 function updateCinematic() {
   cinematicTimer++;
   // Slide portrait in from right
-  const targetX = W - 220;
+  const portraitH = H - 40;
+  const portraitW = portraitH * (375 / 666);
+  const targetX = W - portraitW - 20;
   cinematicSlideX += (targetX - cinematicSlideX) * 0.08;
   // Auto-advance after 4 seconds
   if (cinematicTimer > 240) {
@@ -482,12 +484,18 @@ function drawCinematic() {
   }
   ctx.fillText(line.trim(), 50, lineY);
 
-  // JD profile portrait sliding in from right
+  // JD profile portrait sliding in from right — large, overlapping message box
   const portrait = sprites["jd-profile"];
   if (portrait) {
-    const pH = 180;
+    const pH = H - 40; // nearly full height
     const pW = pH * (375 / 666);
-    ctx.drawImage(portrait, cinematicSlideX, boxY - 30, pW, pH);
+    const pX = cinematicSlideX;
+    const pY = 20;
+    // Border matching screen border
+    ctx.strokeStyle = "#e94560";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(pX - 2, pY - 2, pW + 4, pH + 4);
+    ctx.drawImage(portrait, pX, pY, pW, pH);
   }
 
   // Skip hint
