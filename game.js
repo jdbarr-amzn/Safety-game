@@ -48,10 +48,10 @@ const SPRITE_DEFS = {
   "player-run":    { src: "sprites/player-run.png",    cols: 5, rows: 5, fw: 396, fh: 534, frames: 25 },
   "player-jump":   { src: "sprites/player-jump.png",   cols: 5, rows: 5, fw: 324, fh: 610, frames: 25 },
   "player-shield": { src: "sprites/player-shield.png", cols: 5, rows: 5, fw: 252, fh: 520, frames: 25 },
-  "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1, drawH: 113, offsetY: 57 },
-  "hazard-fire": { src: "sprites/hazard-fire.png", cols: 5, rows: 5, fw: 339, fh: 404, frames: 25, drawH: 70, offsetY: 10, noFlip: true },
-  "hazard-electrical": { src: "sprites/hazard-electrical.png", cols: 3, rows: 3, fw: 120, fh: 120, frames: 9, drawH: 70, offsetY: 10, noFlip: true },
-  "hazard-chemical": { src: "sprites/hazard-chemical.png", cols: 1, rows: 1, fw: 791, fh: 791, frames: 1, drawH: 84, offsetY: 48, noFlip: true },
+  "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1, drawH: 140, offsetY: 57 },
+  "hazard-fire": { src: "sprites/hazard-fire.png", cols: 5, rows: 5, fw: 339, fh: 404, frames: 25, drawH: 90, offsetY: 10, noFlip: true },
+  "hazard-electrical": { src: "sprites/hazard-electrical.png", cols: 3, rows: 3, fw: 120, fh: 120, frames: 9, drawH: 90, offsetY: 10, noFlip: true },
+  "hazard-chemical": { src: "sprites/hazard-chemical.png", cols: 1, rows: 1, fw: 791, fh: 791, frames: 1, drawH: 110, offsetY: 48, noFlip: true },
   "manager": { src: "sprites/manager.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1 },
   "safety-jd": { src: "sprites/safety-jd.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1 },
   "jd-profile": { src: "sprites/jd-profile.png", cols: 1, rows: 1, fw: 375, fh: 666, frames: 1 },
@@ -150,10 +150,10 @@ function generateLevel(lvl) {
     const w = 80 + Math.random() * 80;
     platforms.push({ x, y, w, h: 16, type: "float" });
     if (Math.random() > 0.4) {
-      coins.push({ x: x + w / 2 - 8, y: y - 25, w: 16, h: 16, collected: false });
+      coins.push({ x: x + w / 2 - 8, y: y - 25, w: 22, h: 22, collected: false });
     } else if (Math.random() < 0.3) {
       const ht = HAZARD_TYPES[Math.floor(Math.random() * HAZARD_TYPES.length)];
-      hazards.push({ x: x + w / 2 - 15, y: y - 38, w: 30, h: 30, type: ht, timer: Math.random() * 6 });
+      hazards.push({ x: x + w / 2 - 20, y: y - 48, w: 40, h: 40, type: ht, timer: Math.random() * 6 });
     }
     lastY = y;
     if (Math.random() < 0.3) lastY = groundY;
@@ -177,7 +177,7 @@ function generateLevel(lvl) {
   for (let x = 500; x < goalX - 100; x += 200 + Math.random() * 300) {
     if (!hasGround(x) || tooClose(x)) continue;
     const ht = HAZARD_TYPES[Math.floor(Math.random() * HAZARD_TYPES.length)];
-    const h = { x, y: groundY - 30, w: 30, h: 30, type: ht, timer: Math.random() * 6, facing: 1 };
+    const h = { x, y: groundY - 40, w: 40, h: 40, type: ht, timer: Math.random() * 6, facing: 1 };
     if (ht.patrols) {
       h.originX = x;
       h.patrolRange = 60 + Math.random() * 60;
@@ -197,14 +197,14 @@ function generateLevel(lvl) {
       if (Math.abs(f.x - x) < 150) { anchorY = Math.min(anchorY, f.y); }
     }
     const py = anchorY - 30 - Math.random() * 40;
-    powerups.push({ x, y: Math.max(40, py), w: 28, h: 28, type: pt, collected: false, bob: Math.random() * Math.PI * 2 });
+    powerups.push({ x, y: Math.max(40, py), w: 36, h: 36, type: pt, collected: false, bob: Math.random() * Math.PI * 2 });
     placeAt(x);
   }
 
   // Question triggers
   for (let x = 600; x < goalX - 100; x += 500 + Math.random() * 400) {
     if (!hasGround(x) || tooClose(x)) continue;
-    questionTriggers.push({ x, y: groundY - 50, w: 36, h: 36, used: false });
+    questionTriggers.push({ x, y: groundY - 50, w: 46, h: 46, used: false });
     placeAt(x);
   }
 
@@ -221,7 +221,7 @@ function startGame() {
   playerName = document.getElementById("player-name").value.trim() || "Player";
   score = 0; lives = 3; level = 1; cameraX = 0;
   activeEffects = {}; usedQuestions = new Set(); particles = [];
-  player = { x: 50, y: H - 120, w: 30, h: 56, vx: 0, vy: 0, onGround: false, facing: 1, shielded: false, frame: 0 };
+  player = { x: 50, y: H - 120, w: 40, h: 72, vx: 0, vy: 0, onGround: false, facing: 1, shielded: false, frame: 0 };
   lastBoxSpawn = 0;
   generateLevel(level);
   showScreen("playing");
@@ -346,7 +346,7 @@ function update() {
     lastBoxSpawn = now;
     // Spawn near the player's visible area with some randomness
     const bx = player.x - 100 + Math.random() * (W + 200);
-    fallingBoxes.push({ x: bx, y: -30, w: 26, h: 26, vy: 1.5 + Math.random() * 1.5 + level * 0.3 });
+    fallingBoxes.push({ x: bx, y: -30, w: 34, h: 34, vy: 1.5 + Math.random() * 1.5 + level * 0.3 });
   }
 
   // Update falling boxes
@@ -716,7 +716,7 @@ function draw() {
     if (p.type === "goal") {
       const goalSprite = level <= 3 ? sprites["safety-jd"] : sprites["manager"];
       if (goalSprite) {
-        const drawH = 62;
+        const drawH = 80;
         const drawW = drawH;
         ctx.drawImage(goalSprite, p.x + p.w / 2 - drawW / 2, p.y + p.h - drawH - 2, drawW, drawH);
       } else {
@@ -745,11 +745,11 @@ function draw() {
     if (c.collected) continue;
     ctx.fillStyle = "#f1c40f";
     ctx.beginPath();
-    ctx.arc(c.x + 8, c.y + 8, 8, 0, Math.PI * 2);
+    ctx.arc(c.x + 11, c.y + 11, 11, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = "#f39c12";
-    ctx.font = "bold 10px sans-serif";
-    ctx.fillText("$", c.x + 4, c.y + 13);
+    ctx.font = "bold 13px sans-serif";
+    ctx.fillText("$", c.x + 5, c.y + 16);
   }
 
   // Hazards
@@ -794,8 +794,8 @@ function draw() {
   for (const p of powerups) {
     if (p.collected) continue;
     const bobY = Math.sin(p.bob) * 5;
-    ctx.font = "22px serif";
-    ctx.fillText(p.type.emoji, p.x, p.y + 22 + bobY);
+    ctx.font = "30px serif";
+    ctx.fillText(p.type.emoji, p.x, p.y + 28 + bobY);
   }
 
   // Falling boxes
@@ -824,11 +824,11 @@ function draw() {
   // Question triggers
   for (const qt of questionTriggers) {
     if (qt.used) continue;
-    ctx.font = "28px serif";
-    ctx.fillText("⚠️", qt.x, qt.y + 28);
+    ctx.font = "36px serif";
+    ctx.fillText("⚠️", qt.x, qt.y + 34);
     ctx.fillStyle = "#fff";
-    ctx.font = "bold 12px sans-serif";
-    ctx.fillText("?", qt.x + 11, qt.y + 18);
+    ctx.font = "bold 16px sans-serif";
+    ctx.fillText("?", qt.x + 14, qt.y + 22);
   }
 
   // Player
