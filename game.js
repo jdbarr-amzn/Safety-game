@@ -491,10 +491,6 @@ function drawCinematic() {
     const pW = pH * (375 / 666);
     const pX = cinematicSlideX;
     const pY = 20;
-    // Border matching screen border
-    ctx.strokeStyle = "#e94560";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(pX - 2, pY - 2, pW + 4, pH + 4);
     ctx.drawImage(portrait, pX, pY, pW, pH);
   }
 
