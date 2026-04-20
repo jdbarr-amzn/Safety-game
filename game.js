@@ -572,23 +572,60 @@ function drawCachedBackground() {
 
     // Warehouse ceiling/wall gradient
     const grad = bg.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, "#3a3a3a");
-    grad.addColorStop(0.15, "#4a4a4a");
-    grad.addColorStop(1, "#2a2a2a");
+    grad.addColorStop(0, "#2a2a2a");
+    grad.addColorStop(0.1, "#3a3a3a");
+    grad.addColorStop(0.3, "#353535");
+    grad.addColorStop(1, "#252525");
     bg.fillStyle = grad;
     bg.fillRect(0, 0, W, H);
 
-    // Ceiling beams
-    bg.fillStyle = "#333";
-    for (let i = 0; i < 20; i++) {
-      const bx = i * 160;
-      bg.fillRect(bx, 0, 8, 30);
-      bg.fillRect(bx - 20, 28, 48, 4);
+    // Ceiling beams with bolts
+    for (let i = 0; i < 25; i++) {
+      const bx = i * 130;
+      bg.fillStyle = "#383838";
+      bg.fillRect(bx, 0, 10, 34);
+      bg.fillStyle = "#404040";
+      bg.fillRect(bx - 24, 30, 58, 5);
+      // Bolts
+      bg.fillStyle = "#555";
+      bg.fillRect(bx - 18, 31, 3, 3);
+      bg.fillRect(bx + 24, 31, 3, 3);
+    }
+
+    // Ceiling lights
+    for (let i = 0; i < 8; i++) {
+      const lx = 80 + i * 140;
+      bg.fillStyle = "#666";
+      bg.fillRect(lx, 34, 40, 4);
+      // Light glow
+      bg.fillStyle = "rgba(255, 255, 200, 0.04)";
+      bg.beginPath();
+      bg.moveTo(lx, 38);
+      bg.lineTo(lx + 40, 38);
+      bg.lineTo(lx + 80, H - 50);
+      bg.lineTo(lx - 40, H - 50);
+      bg.closePath();
+      bg.fill();
+    }
+
+    // Back wall texture — faint brick pattern
+    bg.fillStyle = "rgba(60, 60, 60, 0.3)";
+    for (let y = 50; y < H - 50; y += 20) {
+      const offset = (Math.floor(y / 20) % 2) * 30;
+      for (let x = offset; x < W; x += 60) {
+        bg.fillRect(x, y, 56, 18);
+      }
     }
 
     // Warehouse floor line
     bg.fillStyle = "#e8c840";
     bg.fillRect(0, H - 42, W, 3);
+
+    // Floor hazard stripes (yellow/black) at edges
+    for (let x = 0; x < W; x += 40) {
+      bg.fillStyle = (x / 40) % 2 === 0 ? "#e8c840" : "#333";
+      bg.fillRect(x, H - 39, 20, 3);
+    }
   }
   ctx.drawImage(bgCanvas, 0, 0);
 }
@@ -597,32 +634,77 @@ function draw() {
   drawCachedBackground();
 
   // Back wall — far racking (slow parallax)
-  ctx.fillStyle = "#444";
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 12; i++) {
     const rx = i * 140 - (cameraX * 0.1) % 140;
+    // Upright posts
+    ctx.fillStyle = "#444";
     ctx.fillRect(rx, 60, 6, H - 100);
     ctx.fillRect(rx + 80, 60, 6, H - 100);
-    ctx.fillStyle = "#555";
+    // Shelves with boxes
     for (let s = 0; s < 3; s++) {
       const sy = 80 + s * 100;
-      ctx.fillRect(rx, sy, 86, 5);
-      ctx.fillStyle = "#8B6914";
-      ctx.fillRect(rx + 10 + (s * 17 % 30), sy - 18, 22, 16);
       ctx.fillStyle = "#555";
+      ctx.fillRect(rx, sy, 86, 5);
+      // Varied boxes
+      ctx.fillStyle = "#8B6914";
+      ctx.fillRect(rx + 8 + (s * 17 % 25), sy - 20, 24, 18);
+      ctx.fillStyle = "#A0522D";
+      ctx.fillRect(rx + 42 + (s * 11 % 15), sy - 16, 18, 14);
+      // Small box
+      ctx.fillStyle = "#7a5c2e";
+      ctx.fillRect(rx + 65, sy - 12, 12, 10);
     }
-    ctx.fillStyle = "#444";
   }
 
   // Mid racking (medium parallax)
-  for (let i = 0; i < 8; i++) {
-    const rx = i * 180 - (cameraX * 0.25) % 180;
+  for (let i = 0; i < 10; i++) {
+    const rx = i * 160 - (cameraX * 0.25) % 160;
+    // Orange upright posts
     ctx.fillStyle = "#d35400";
-    ctx.fillRect(rx, 100, 8, H - 140);
-    ctx.fillRect(rx + 100, 100, 8, H - 140);
+    ctx.fillRect(rx, 90, 8, H - 130);
+    ctx.fillRect(rx + 100, 90, 8, H - 130);
+    // Cross bracing
+    ctx.strokeStyle = "#c0392b";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(rx + 4, 120);
+    ctx.lineTo(rx + 104, 220);
+    ctx.moveTo(rx + 104, 120);
+    ctx.lineTo(rx + 4, 220);
+    ctx.stroke();
+    // Blue shelf beams with pallets
     ctx.fillStyle = "#2c6fbb";
     for (let s = 0; s < 3; s++) {
-      const sy = 140 + s * 100;
+      const sy = 130 + s * 110;
       ctx.fillRect(rx, sy, 108, 6);
+      // Pallet
+      ctx.fillStyle = "#c8a96e";
+      ctx.fillRect(rx + 10, sy - 28, 38, 26);
+      // Wrapped pallet
+      ctx.fillStyle = "#ddd";
+      ctx.fillRect(rx + 58, sy - 24, 30, 22);
+      ctx.fillStyle = "#2c6fbb";
+    }
+  }
+
+  // Safety signs on back wall (slow parallax)
+  for (let i = 0; i < 5; i++) {
+    const sx = 200 + i * 280 - (cameraX * 0.15) % 280;
+    // Green exit sign
+    if (i % 2 === 0) {
+      ctx.fillStyle = "#27ae60";
+      ctx.fillRect(sx, 55, 36, 18);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 9px sans-serif";
+      ctx.fillText("EXIT", sx + 4, 68);
+    } else {
+      // Safety poster
+      ctx.fillStyle = "#2980b9";
+      ctx.fillRect(sx, 52, 28, 34);
+      ctx.fillStyle = "#fff";
+      ctx.font = "7px sans-serif";
+      ctx.fillText("SAFE", sx + 3, 72);
+      ctx.fillText("WORK", sx + 2, 80);
     }
   }
 
