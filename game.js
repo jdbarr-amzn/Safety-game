@@ -560,15 +560,17 @@ function draw() {
       const frameIdx = Math.floor(h.timer * 8) % def.frames;
       const col = frameIdx % def.cols;
       const row = Math.floor(frameIdx / def.cols);
-      const drawSize = 113;
-      // First half of frames face right, second half face left
-      const frameFacing = frameIdx < def.frames / 2 ? 1 : -1;
+      const aspect = def.fw / def.fh;
+      const drawH = def.frames === 1 ? 113 : 70; // static sprites larger, animated smaller
+      const drawW = drawH * aspect;
+      const anchorY = h.y + h.h; // bottom of hitbox = surface level
       ctx.save();
-      ctx.translate(h.x + h.w / 2, h.y + h.h / 2 + 14);
+      ctx.translate(h.x + h.w / 2, anchorY);
+      const frameFacing = def.frames > 1 ? (frameIdx < def.frames / 2 ? 1 : -1) : 1;
       ctx.scale(frameFacing, 1);
       ctx.drawImage(spr,
         col * def.fw, row * def.fh, def.fw, def.fh,
-        -drawSize / 2, -drawSize / 2, drawSize, drawSize);
+        -drawW / 2, -drawH, drawW, drawH);
       ctx.restore();
     } else {
       // Emoji fallback
