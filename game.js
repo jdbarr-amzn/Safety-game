@@ -274,7 +274,7 @@ function update() {
   const jumpPressed = keys["ArrowUp"] || keys["KeyW"] || keys["Space"];
   if (jumpPressed && !player.jumpHeld) {
     if (player.onGround) {
-      player.vy = -11;
+      player.vy = -12.5;
       player.onGround = false;
       player.canDoubleJump = !!activeEffects.doublejump;
     } else if (player.canDoubleJump) {
@@ -284,7 +284,7 @@ function update() {
   }
   player.jumpHeld = jumpPressed;
 
-  player.vy += 0.55;
+  player.vy += 0.48;
   player.x += player.vx;
   player.y += player.vy;
   player.onGround = false;
