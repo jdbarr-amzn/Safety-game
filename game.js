@@ -68,6 +68,32 @@ function loadSprite(name) {
 
 Object.keys(SPRITE_DEFS).forEach(loadSprite);
 
+// ── Tile Loading ──
+const tiles = {};
+const TILE_SIZE = 32;
+const TILE_NAMES = {
+  wallDark: "IndustrialTile_01", wallPanel: "IndustrialTile_02", wallSolid: "IndustrialTile_03",
+  floorCornerL: "IndustrialTile_04", floorTop: "IndustrialTile_05", floorCornerR: "IndustrialTile_06",
+  beam1: "IndustrialTile_07", beam2: "IndustrialTile_08", hazardStripe: "IndustrialTile_09",
+  platLeft: "IndustrialTile_31", platMid: "IndustrialTile_32", platRight: "IndustrialTile_33",
+  floorFill: "IndustrialTile_34", floorFill2: "IndustrialTile_35",
+};
+const OBJ_NAMES = ["Locker1", "Locker2", "Barrel1", "Barrel2", "Box1", "Box2", "Fire-extinguisher1", "Fence1"];
+const objImages = {};
+
+function loadTile(key, name) {
+  const img = new Image();
+  img.src = "sprites/Industrial Tileset/" + name + ".png";
+  img.onload = () => { tiles[key] = img; };
+}
+function loadObj(name) {
+  const img = new Image();
+  img.src = "sprites/Objects/" + name + ".png";
+  img.onload = () => { objImages[name] = img; };
+}
+Object.entries(TILE_NAMES).forEach(([k, v]) => loadTile(k, v));
+OBJ_NAMES.forEach(loadObj);
+
 // ── State ──
 let gameState = "menu";
 let player, platforms, hazards, powerups, coins, particles, questionTriggers, fallingBoxes;
@@ -214,10 +240,12 @@ function generateLevel(lvl) {
     platforms.push({ x: goalX - 50, y: groundY, w: 200, h: 40, type: "ground" });
   }
   platforms.push({ x: goalX, y: groundY - 60, w: 60, h: 60, type: "goal" });
+  generateBgDecorations();
 }
 
 // ── Start Game ──
 function startGame() {
+  bgCanvas = null; // reset cached background
   playerName = document.getElementById("player-name").value.trim() || "Player";
   score = 0; lives = 3; level = 1; cameraX = 0;
   activeEffects = {}; usedQuestions = new Set(); particles = [];
@@ -564,154 +592,110 @@ function answerQuestion(idx, btn) {
 // ── Cached background ──
 let bgCanvas = null;
 function drawCachedBackground() {
+  // Wait for tiles to load before caching
+  if (!tiles.wallDark || !tiles.wallSolid || !tiles.wallPanel) return false;
   if (!bgCanvas) {
     bgCanvas = document.createElement("canvas");
     bgCanvas.width = W;
     bgCanvas.height = H;
     const bg = bgCanvas.getContext("2d");
 
-    // Warehouse ceiling/wall gradient
-    const grad = bg.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, "#2a2a2a");
-    grad.addColorStop(0.1, "#3a3a3a");
-    grad.addColorStop(0.3, "#353535");
-    grad.addColorStop(1, "#252525");
-    bg.fillStyle = grad;
-    bg.fillRect(0, 0, W, H);
+    // Tile the back wall
+    const ts = TILE_SIZE;
+    for (let y = 0; y < H - 44; y += ts) {
+      for (let x = 0; x < W; x += ts) {
+        // Alternate wall tiles for variety
+        const pick = ((x / ts | 0) + (y / ts | 0)) % 3;
+        const t = pick === 0 ? tiles.wallDark : pick === 1 ? tiles.wallSolid : tiles.wallPanel;
+        if (t) bg.drawImage(t, x, y, ts, ts);
+      }
+    }
 
-    // Ceiling beams with bolts
-    for (let i = 0; i < 25; i++) {
-      const bx = i * 130;
-      bg.fillStyle = "#383838";
-      bg.fillRect(bx, 0, 10, 34);
-      bg.fillStyle = "#404040";
-      bg.fillRect(bx - 24, 30, 58, 5);
-      // Bolts
-      bg.fillStyle = "#555";
-      bg.fillRect(bx - 18, 31, 3, 3);
-      bg.fillRect(bx + 24, 31, 3, 3);
+    // Ceiling beams using beam tiles
+    if (tiles.beam1) {
+      for (let x = 0; x < W; x += ts) {
+        bg.drawImage(tiles.beam1, x, 0, ts, ts);
+      }
     }
 
     // Ceiling lights
     for (let i = 0; i < 8; i++) {
       const lx = 80 + i * 140;
-      bg.fillStyle = "#666";
-      bg.fillRect(lx, 34, 40, 4);
-      // Light glow
-      bg.fillStyle = "rgba(255, 255, 200, 0.04)";
+      bg.fillStyle = "#888";
+      bg.fillRect(lx, ts, 40, 4);
+      bg.fillStyle = "rgba(255, 255, 200, 0.03)";
       bg.beginPath();
-      bg.moveTo(lx, 38);
-      bg.lineTo(lx + 40, 38);
-      bg.lineTo(lx + 80, H - 50);
-      bg.lineTo(lx - 40, H - 50);
+      bg.moveTo(lx, ts + 4);
+      bg.lineTo(lx + 40, ts + 4);
+      bg.lineTo(lx + 70, H - 50);
+      bg.lineTo(lx - 30, H - 50);
       bg.closePath();
       bg.fill();
     }
 
-    // Back wall texture — faint brick pattern
-    bg.fillStyle = "rgba(60, 60, 60, 0.3)";
-    for (let y = 50; y < H - 50; y += 20) {
-      const offset = (Math.floor(y / 20) % 2) * 30;
-      for (let x = offset; x < W; x += 60) {
-        bg.fillRect(x, y, 56, 18);
+    // Hazard stripe floor line
+    if (tiles.hazardStripe) {
+      for (let x = 0; x < W; x += ts) {
+        bg.drawImage(tiles.hazardStripe, x, H - 44, ts, ts);
       }
-    }
-
-    // Warehouse floor line
-    bg.fillStyle = "#e8c840";
-    bg.fillRect(0, H - 42, W, 3);
-
-    // Floor hazard stripes (yellow/black) at edges
-    for (let x = 0; x < W; x += 40) {
-      bg.fillStyle = (x / 40) % 2 === 0 ? "#e8c840" : "#333";
-      bg.fillRect(x, H - 39, 20, 3);
     }
   }
   ctx.drawImage(bgCanvas, 0, 0);
+  return true;
+}
+
+// Background decoration objects (generated once per level)
+let bgDecorations = [];
+function generateBgDecorations() {
+  bgDecorations = [];
+  const objKeys = Object.keys(objImages);
+  if (!objKeys.length) return;
+  for (let x = 100; x < 4000; x += 200 + Math.random() * 300) {
+    const name = objKeys[Math.floor(Math.random() * objKeys.length)];
+    bgDecorations.push({ x, name, scale: 0.6 + Math.random() * 0.4 });
+  }
 }
 
 function draw() {
-  drawCachedBackground();
-
-  // Back wall — far racking (slow parallax)
-  for (let i = 0; i < 12; i++) {
-    const rx = i * 140 - (cameraX * 0.1) % 140;
-    // Upright posts
-    ctx.fillStyle = "#444";
-    ctx.fillRect(rx, 60, 6, H - 100);
-    ctx.fillRect(rx + 80, 60, 6, H - 100);
-    // Shelves with boxes
-    for (let s = 0; s < 3; s++) {
-      const sy = 80 + s * 100;
-      ctx.fillStyle = "#555";
-      ctx.fillRect(rx, sy, 86, 5);
-      // Varied boxes
-      ctx.fillStyle = "#8B6914";
-      ctx.fillRect(rx + 8 + (s * 17 % 25), sy - 20, 24, 18);
-      ctx.fillStyle = "#A0522D";
-      ctx.fillRect(rx + 42 + (s * 11 % 15), sy - 16, 18, 14);
-      // Small box
-      ctx.fillStyle = "#7a5c2e";
-      ctx.fillRect(rx + 65, sy - 12, 12, 10);
-    }
+  // Fallback if tiles not loaded yet
+  if (!drawCachedBackground()) {
+    const grad = ctx.createLinearGradient(0, 0, 0, H);
+    grad.addColorStop(0, "#2a2a2a");
+    grad.addColorStop(1, "#252525");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
   }
 
-  // Mid racking (medium parallax)
-  for (let i = 0; i < 10; i++) {
-    const rx = i * 160 - (cameraX * 0.25) % 160;
-    // Orange upright posts
-    ctx.fillStyle = "#d35400";
-    ctx.fillRect(rx, 90, 8, H - 130);
-    ctx.fillRect(rx + 100, 90, 8, H - 130);
-    // Cross bracing
-    ctx.strokeStyle = "#c0392b";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(rx + 4, 120);
-    ctx.lineTo(rx + 104, 220);
-    ctx.moveTo(rx + 104, 120);
-    ctx.lineTo(rx + 4, 220);
-    ctx.stroke();
-    // Blue shelf beams with pallets
-    ctx.fillStyle = "#2c6fbb";
-    for (let s = 0; s < 3; s++) {
-      const sy = 130 + s * 110;
-      ctx.fillRect(rx, sy, 108, 6);
-      // Pallet
-      ctx.fillStyle = "#c8a96e";
-      ctx.fillRect(rx + 10, sy - 28, 38, 26);
-      // Wrapped pallet
-      ctx.fillStyle = "#ddd";
-      ctx.fillRect(rx + 58, sy - 24, 30, 22);
-      ctx.fillStyle = "#2c6fbb";
-    }
+  // Back wall decorations (slow parallax)
+  ctx.globalAlpha = 0.4;
+  for (const d of bgDecorations) {
+    const img = objImages[d.name];
+    if (!img) continue;
+    const dx = d.x - (cameraX * 0.1) % 3000;
+    const sz = 32 * d.scale;
+    ctx.drawImage(img, dx, H - 80 - sz, sz, sz);
   }
+  ctx.globalAlpha = 1;
 
-  // Safety signs on back wall (slow parallax)
-  for (let i = 0; i < 5; i++) {
-    const sx = 200 + i * 280 - (cameraX * 0.15) % 280;
-    // Green exit sign
-    if (i % 2 === 0) {
-      ctx.fillStyle = "#27ae60";
-      ctx.fillRect(sx, 55, 36, 18);
-      ctx.fillStyle = "#fff";
-      ctx.font = "bold 9px sans-serif";
-      ctx.fillText("EXIT", sx + 4, 68);
-    } else {
-      // Safety poster
-      ctx.fillStyle = "#2980b9";
-      ctx.fillRect(sx, 52, 28, 34);
-      ctx.fillStyle = "#fff";
-      ctx.font = "7px sans-serif";
-      ctx.fillText("SAFE", sx + 3, 72);
-      ctx.fillText("WORK", sx + 2, 80);
+  // Mid parallax — tiled wall panels
+  if (tiles.wallPanel && tiles.beam2) {
+    ctx.globalAlpha = 0.3;
+    for (let i = 0; i < 14; i++) {
+      const rx = i * 128 - (cameraX * 0.2) % 128;
+      for (let y = 60; y < H - 60; y += TILE_SIZE) {
+        ctx.drawImage(tiles.wallPanel, rx, y, TILE_SIZE, TILE_SIZE);
+      }
+      // Beam accent
+      ctx.drawImage(tiles.beam2, rx + 40, 60, TILE_SIZE, TILE_SIZE);
     }
+    ctx.globalAlpha = 1;
   }
 
   ctx.save();
   ctx.translate(-cameraX, 0);
 
   // Platforms
+  const ts = TILE_SIZE;
   for (const p of platforms) {
     if (p.type === "goal") {
       const goalSprite = level <= 3 ? sprites["safety-jd"] : sprites["manager"];
@@ -726,17 +710,38 @@ function draw() {
         ctx.fillText("🚩", p.x + 14, p.y + 36);
       }
     } else if (p.type === "ground") {
-      ctx.fillStyle = "#5a5a5a";
-      ctx.fillRect(p.x, p.y, p.w, p.h);
-      // Yellow safety line on floor edge
-      ctx.fillStyle = "#e8c840";
-      ctx.fillRect(p.x, p.y, p.w, 3);
+      // Tiled ground platform
+      const tTop = tiles.floorTop;
+      const tFill = tiles.floorFill;
+      if (tTop && tFill) {
+        for (let x = p.x; x < p.x + p.w; x += ts) {
+          const tw = Math.min(ts, p.x + p.w - x);
+          ctx.drawImage(tTop, x, p.y, tw, ts);
+          if (p.h > ts) ctx.drawImage(tFill, x, p.y + ts, tw, p.h - ts);
+        }
+      } else {
+        ctx.fillStyle = "#5a5a5a";
+        ctx.fillRect(p.x, p.y, p.w, p.h);
+        ctx.fillStyle = "#e8c840";
+        ctx.fillRect(p.x, p.y, p.w, 3);
+      }
     } else {
-      // Metal grate platforms
-      ctx.fillStyle = "#6a6a6a";
-      ctx.fillRect(p.x, p.y, p.w, p.h);
-      ctx.fillStyle = "#888";
-      ctx.fillRect(p.x, p.y, p.w, 2);
+      // Tiled floating platform
+      const tL = tiles.platLeft;
+      const tM = tiles.platMid;
+      const tR = tiles.platRight;
+      if (tL && tM && tR) {
+        ctx.drawImage(tL, p.x, p.y - 8, ts, ts);
+        for (let x = p.x + ts; x < p.x + p.w - ts; x += ts) {
+          ctx.drawImage(tM, x, p.y - 8, ts, ts);
+        }
+        ctx.drawImage(tR, p.x + p.w - ts, p.y - 8, ts, ts);
+      } else {
+        ctx.fillStyle = "#6a6a6a";
+        ctx.fillRect(p.x, p.y, p.w, p.h);
+        ctx.fillStyle = "#888";
+        ctx.fillRect(p.x, p.y, p.w, 2);
+      }
     }
   }
 
