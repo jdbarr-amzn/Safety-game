@@ -50,7 +50,7 @@ const SPRITE_DEFS = {
   "player-shield": { src: "sprites/player-shield.png", cols: 5, rows: 5, fw: 252, fh: 520, frames: 25 },
   "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1, drawH: 113, offsetY: 57 },
   "hazard-fire": { src: "sprites/hazard-fire.png", cols: 5, rows: 5, fw: 339, fh: 404, frames: 25, drawH: 70, offsetY: 10 },
-  "hazard-electrical": { src: "sprites/hazard-electrical.png", cols: 3, rows: 3, fw: 120, fh: 120, frames: 9, drawH: 70, offsetY: 10 },
+  "hazard-electrical": { src: "sprites/hazard-electrical.png", cols: 3, rows: 3, fw: 120, fh: 120, frames: 9, drawH: 70, offsetY: 10, noFlip: true },
 };
 const ANIM_SPEED = 0.4; // frames per game tick
 
@@ -566,7 +566,7 @@ function draw() {
       const anchorY = h.y + h.h + (def.offsetY || 0);
       ctx.save();
       ctx.translate(h.x + h.w / 2, anchorY);
-      const frameFacing = def.frames > 1 ? (frameIdx < def.frames / 2 ? 1 : -1) : 1;
+      const frameFacing = (!def.noFlip && def.frames > 1) ? (frameIdx < def.frames / 2 ? 1 : -1) : 1;
       ctx.scale(frameFacing, 1);
       ctx.drawImage(spr,
         col * def.fw, row * def.fh, def.fw, def.fh,
