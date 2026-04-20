@@ -78,7 +78,7 @@ const TILE_NAMES = {
   platLeft: "IndustrialTile_31", platMid: "IndustrialTile_32", platRight: "IndustrialTile_33",
   floorFill: "IndustrialTile_34", floorFill2: "IndustrialTile_35",
 };
-const OBJ_NAMES = ["Locker1", "Locker2", "Barrel1", "Barrel2", "Box1", "Box2", "Fire-extinguisher1", "Fence1", "Fall indicator"];
+const OBJ_NAMES = ["Locker1", "Locker2", "Barrel1", "Barrel2", "Box1", "Box2", "Fire-extinguisher1", "Fence1", "Fall indicator", "Box3", "Box4"];
 const objImages = {};
 
 function loadTile(key, name) {
@@ -375,7 +375,9 @@ function update() {
     const bx = player.x - 100 + Math.random() * (W + 200);
     const speed = 1.5 + Math.random() * 1.5 + level * 0.3;
     // Spawn warning indicator first, box drops after warning
-    fallingBoxes.push({ x: bx, y: -30, w: 34, h: 34, vy: 0, dropSpeed: speed, warning: 60 });
+    const boxSprites = ["Box1", "Box3", "Box4"];
+    const boxSpr = boxSprites[Math.floor(Math.random() * boxSprites.length)];
+    fallingBoxes.push({ x: bx, y: -30, w: 34, h: 34, vy: 0, dropSpeed: speed, warning: 60, sprite: boxSpr });
   }
 
   // Update falling boxes
@@ -855,17 +857,13 @@ function draw() {
       }
       continue;
     }
-    ctx.fillStyle = "#e67e22";
-    ctx.fillRect(b.x, b.y, b.w, b.h);
-    ctx.strokeStyle = "#d35400";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(b.x, b.y, b.w, b.h);
-    ctx.strokeStyle = "#f39c12";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(b.x, b.y); ctx.lineTo(b.x + b.w, b.y + b.h);
-    ctx.moveTo(b.x + b.w, b.y); ctx.lineTo(b.x, b.y + b.h);
-    ctx.stroke();
+    const boxImg = objImages[b.sprite];
+    if (boxImg) {
+      ctx.drawImage(boxImg, b.x, b.y, b.w, b.h);
+    } else {
+      ctx.fillStyle = "#e67e22";
+      ctx.fillRect(b.x, b.y, b.w, b.h);
+    }
     // Warning shadow on ground
     ctx.globalAlpha = 0.2;
     ctx.fillStyle = "#e74c3c";
