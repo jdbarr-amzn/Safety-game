@@ -78,6 +78,7 @@ const TILE_NAMES = {
   platLeft: "IndustrialTile_31", platMid: "IndustrialTile_32", platRight: "IndustrialTile_33",
   floorFill: "IndustrialTile_34", floorFill2: "IndustrialTile_35",
   raisedPlatform: "Raised Platform A",
+  railing: "Railing A",
 };
 const OBJ_NAMES = ["Locker1", "Locker2", "Barrel1", "Barrel2", "Box1", "Box2", "Fire-extinguisher1", "Fence1", "Fall indicator", "Box3", "Box4"];
 const objImages = {};
@@ -97,7 +98,7 @@ OBJ_NAMES.forEach(loadObj);
 
 // ── State ──
 let gameState = "menu";
-let player, platforms, hazards, powerups, coins, particles, questionTriggers, fallingBoxes;
+let player, platforms, hazards, powerups, coins, particles, questionTriggers, fallingBoxes, railings;
 let score, lives, level, cameraX, playerName, activeEffects, usedQuestions;
 let currentQuestion = null;
 let lastBoxSpawn = 0;
@@ -233,6 +234,14 @@ function generateLevel(lvl) {
   for (let x = 600; x < goalX - 100; x += 500 + Math.random() * 400) {
     if (!hasGround(x) || tooClose(x)) continue;
     questionTriggers.push({ x, y: groundY - 50, w: 46, h: 46, used: false });
+    placeAt(x);
+  }
+
+  // Railings — decorative foreground objects on solid ground, not near hazards/pitfalls
+  railings = [];
+  for (let x = 300; x < goalX - 200; x += 300 + Math.random() * 400) {
+    if (!hasGround(x) || tooClose(x)) continue;
+    railings.push({ x, y: groundY });
     placeAt(x);
   }
 
@@ -941,6 +950,16 @@ function draw() {
   }
 
   ctx.restore();
+
+  // Railings — drawn in front of player
+  const railImg = tiles.railing;
+  if (railImg) {
+    for (const r of railings) {
+      const rH = 70;
+      const rW = 70;
+      ctx.drawImage(railImg, r.x, r.y - rH, rW, rH);
+    }
+  }
 
   // Particles
   for (const p of particles) {
