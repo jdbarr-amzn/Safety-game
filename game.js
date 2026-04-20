@@ -241,7 +241,8 @@ function generateLevel(lvl) {
   railings = [];
   for (let x = 300; x < goalX - 200; x += 300 + Math.random() * 400) {
     if (!hasGround(x) || tooClose(x)) continue;
-    railings.push({ x, y: groundY });
+    const count = 1 + Math.floor(Math.random() * 3); // 1-3 units
+    railings.push({ x, y: groundY, count });
     placeAt(x);
   }
 
@@ -773,15 +774,17 @@ function draw() {
         ctx.fillRect(p.x, p.y, p.w, 3);
       }
     } else {
-      // Raised platform sprite
+      // Raised platform sprite — whole units, doubled for longer platforms
       const rp = tiles.raisedPlatform;
       if (rp) {
-        // Tile the raised platform across the width, keeping aspect ratio for height
+        const aspect = 98 / 111;
         const rpH = 80;
-        const rpW = rpH; // 1:1 aspect (120x120 source)
-        for (let x = p.x; x < p.x + p.w; x += rpW) {
-          const drawW = Math.min(rpW, p.x + p.w - x);
-          ctx.drawImage(rp, 0, 0, (drawW / rpW) * 120, 120, x, p.y - rpH + 16, drawW, rpH);
+        const rpW = rpH * aspect;
+        const count = Math.max(1, Math.round(p.w / rpW));
+        const totalW = count * rpW;
+        const startX = p.x + (p.w - totalW) / 2;
+        for (let i = 0; i < count; i++) {
+          ctx.drawImage(rp, startX + i * rpW, p.y - rpH + 16, rpW, rpH);
         }
       } else {
         ctx.fillStyle = "#6a6a6a";
@@ -955,9 +958,11 @@ function draw() {
   const railImg = tiles.railing;
   if (railImg) {
     for (const r of railings) {
-      const rH = 70;
-      const rW = 70;
-      ctx.drawImage(railImg, r.x, r.y - rH, rW, rH);
+      const rH = 36; // half player height
+      const rW = rH * (96 / 16); // preserve aspect ratio
+      for (let i = 0; i < r.count; i++) {
+        ctx.drawImage(railImg, r.x + i * rW, r.y - rH, rW, rH);
+      }
     }
   }
 
