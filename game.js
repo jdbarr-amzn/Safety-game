@@ -16,7 +16,7 @@ const QUESTIONS = [
 
 const HAZARD_TYPES = [
   { name: "Wet Floor", emoji: "💧", color: "#3498db", sprite: "hazard-wetfloor" },
-  { name: "Electrical", emoji: "⚡", color: "#f1c40f" },
+  { name: "Electrical", emoji: "⚡", color: "#f1c40f", sprite: "hazard-electrical" },
   { name: "Chemical Spill", emoji: "☣️", color: "#2ecc71" },
   { name: "Fire", emoji: "🔥", color: "#e74c3c", sprite: "hazard-fire" },
 ];
@@ -50,6 +50,7 @@ const SPRITE_DEFS = {
   "player-shield": { src: "sprites/player-shield.png", cols: 5, rows: 5, fw: 252, fh: 520, frames: 25 },
   "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1, drawH: 113, offsetY: 57 },
   "hazard-fire": { src: "sprites/hazard-fire.png", cols: 5, rows: 5, fw: 339, fh: 404, frames: 25, drawH: 70, offsetY: 10 },
+  "hazard-electrical": { src: "sprites/hazard-electrical.png", cols: 3, rows: 3, fw: 120, fh: 120, frames: 9, drawH: 70, offsetY: 10 },
 };
 const ANIM_SPEED = 0.4; // frames per game tick
 
