@@ -78,7 +78,7 @@ const TILE_NAMES = {
   platLeft: "IndustrialTile_31", platMid: "IndustrialTile_32", platRight: "IndustrialTile_33",
   floorFill: "IndustrialTile_34", floorFill2: "IndustrialTile_35",
 };
-const OBJ_NAMES = ["Locker1", "Locker2", "Barrel1", "Barrel2", "Box1", "Box2", "Fire-extinguisher1", "Fence1"];
+const OBJ_NAMES = ["Locker1", "Locker2", "Barrel1", "Barrel2", "Box1", "Box2", "Fire-extinguisher1", "Fence1", "Fall indicator"];
 const objImages = {};
 
 function loadTile(key, name) {
@@ -368,18 +368,25 @@ function update() {
   }
 
   // Falling boxes — spawn rate increases with level
-  const spawnInterval = Math.max(400, 2000 - level * 200); // ms between spawns
+  const spawnInterval = Math.max(400, 2000 - level * 200);
   if (now - lastBoxSpawn > spawnInterval) {
     lastBoxSpawn = now;
-    // Spawn near the player's visible area with some randomness
     const bx = player.x - 100 + Math.random() * (W + 200);
-    fallingBoxes.push({ x: bx, y: -30, w: 34, h: 34, vy: 1.5 + Math.random() * 1.5 + level * 0.3 });
+    const speed = 1.5 + Math.random() * 1.5 + level * 0.3;
+    // Spawn warning indicator first, box drops after warning
+    fallingBoxes.push({ x: bx, y: -30, w: 34, h: 34, vy: 0, dropSpeed: speed, warning: 60 });
   }
 
   // Update falling boxes
   for (let i = fallingBoxes.length - 1; i >= 0; i--) {
     const b = fallingBoxes[i];
-    b.vy += 0.08; // slight acceleration
+    // Warning phase — flash at top before dropping
+    if (b.warning > 0) {
+      b.warning--;
+      if (b.warning === 0) b.vy = b.dropSpeed;
+      continue;
+    }
+    b.vy += 0.08;
     b.y += b.vy;
     // Remove if off screen
     if (b.y > H + 40) { fallingBoxes.splice(i, 1); continue; }
@@ -831,13 +838,27 @@ function draw() {
   }
 
   // Falling boxes
+  const fallIndicator = objImages["Fall indicator"];
   for (const b of fallingBoxes) {
+    // Warning phase — flash indicator at top of screen
+    if (b.warning > 0) {
+      const flash = Math.floor(b.warning / 6) % 2 === 0;
+      if (flash) {
+        if (fallIndicator) {
+          ctx.drawImage(fallIndicator, b.x, 4, 34, 34);
+        } else {
+          ctx.fillStyle = "#e74c3c";
+          ctx.font = "bold 24px sans-serif";
+          ctx.fillText("⚠", b.x + 4, 28);
+        }
+      }
+      continue;
+    }
     ctx.fillStyle = "#e67e22";
     ctx.fillRect(b.x, b.y, b.w, b.h);
     ctx.strokeStyle = "#d35400";
     ctx.lineWidth = 2;
     ctx.strokeRect(b.x, b.y, b.w, b.h);
-    // Cross tape on box
     ctx.strokeStyle = "#f39c12";
     ctx.lineWidth = 1;
     ctx.beginPath();
