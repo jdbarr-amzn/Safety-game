@@ -52,6 +52,8 @@ const SPRITE_DEFS = {
   "hazard-fire": { src: "sprites/hazard-fire.png", cols: 5, rows: 5, fw: 339, fh: 404, frames: 25, drawH: 70, offsetY: 10 },
   "hazard-electrical": { src: "sprites/hazard-electrical.png", cols: 3, rows: 3, fw: 120, fh: 120, frames: 9, drawH: 70, offsetY: 10, noFlip: true },
   "manager": { src: "sprites/manager.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1 },
+  "safety-jd": { src: "sprites/safety-jd.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1 },
+  "jd-profile": { src: "sprites/jd-profile.png", cols: 1, rows: 1, fw: 375, fh: 666, frames: 1 },
 };
 const ANIM_SPEED = 0.4; // frames per game tick
 
@@ -106,6 +108,7 @@ function showScreen(name) {
 document.addEventListener("keydown", e => {
   keys[e.code] = true;
   if (["Space", "ArrowUp", "ArrowDown"].includes(e.code)) e.preventDefault();
+  if (gameState === "cinematic" && cinematicTimer > 30) advanceLevel();
 });
 document.addEventListener("keyup", e => keys[e.code] = false);
 
@@ -399,11 +402,98 @@ function loseLife() {
   burst(player.x, player.y, "#e74c3c", 10);
 }
 
+// ── Level Complete Cinematic ──
+const LEVEL_MESSAGES = [
+  "Great work! Safety will take care of all those hazards!",
+  "Well done! Keep up the great work and remember to work safe!",
+  "Thank you for reporting all those hazards! We will get to work making this site the safest place to work!",
+];
+let cinematicTimer = 0;
+let cinematicSlideX = W; // starts off-screen right
+
 function nextLevel() {
-  level++; score += 100;
+  score += 100;
+  // Show cinematic for levels 1-3
+  if (level <= 3) {
+    gameState = "cinematic";
+    cinematicTimer = 0;
+    cinematicSlideX = W;
+  } else {
+    advanceLevel();
+  }
+}
+
+function advanceLevel() {
+  level++;
   player.x = 50; player.y = H - 120; player.vx = 0; player.vy = 0; cameraX = 0;
   generateLevel(level);
   burst(player.x, player.y, "#2ecc71", 15);
+  gameState = "playing";
+}
+
+function updateCinematic() {
+  cinematicTimer++;
+  // Slide portrait in from right
+  const targetX = W - 220;
+  cinematicSlideX += (targetX - cinematicSlideX) * 0.08;
+  // Auto-advance after 4 seconds
+  if (cinematicTimer > 240) {
+    advanceLevel();
+  }
+}
+
+function drawCinematic() {
+  // Draw the game frozen in background
+  draw();
+  // Dark overlay
+  ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+  ctx.fillRect(0, 0, W, H);
+
+  // Message box
+  ctx.fillStyle = "rgba(15, 52, 96, 0.95)";
+  ctx.strokeStyle = "#e94560";
+  ctx.lineWidth = 3;
+  const boxY = H / 2 - 60;
+  ctx.fillRect(30, boxY, W - 60, 120);
+  ctx.strokeRect(30, boxY, W - 60, 120);
+
+  // Level complete header
+  ctx.fillStyle = "#e94560";
+  ctx.font = "bold 22px 'Segoe UI', sans-serif";
+  ctx.fillText("Level " + level + " Complete!", 50, boxY + 30);
+
+  // Message text — wrap within box
+  const msg = LEVEL_MESSAGES[(level - 1) % LEVEL_MESSAGES.length];
+  ctx.fillStyle = "#fff";
+  ctx.font = "16px 'Segoe UI', sans-serif";
+  const maxWidth = W - 280;
+  const words = msg.split(" ");
+  let line = "";
+  let lineY = boxY + 58;
+  for (const word of words) {
+    const test = line + word + " ";
+    if (ctx.measureText(test).width > maxWidth && line) {
+      ctx.fillText(line.trim(), 50, lineY);
+      line = word + " ";
+      lineY += 22;
+    } else {
+      line = test;
+    }
+  }
+  ctx.fillText(line.trim(), 50, lineY);
+
+  // JD profile portrait sliding in from right
+  const portrait = sprites["jd-profile"];
+  if (portrait) {
+    const pH = 180;
+    const pW = pH * (375 / 666);
+    ctx.drawImage(portrait, cinematicSlideX, boxY - 30, pW, pH);
+  }
+
+  // Skip hint
+  ctx.fillStyle = "#888";
+  ctx.font = "12px sans-serif";
+  ctx.fillText("Press any key to continue...", W / 2 - 80, H - 20);
 }
 
 function gameOver() {
@@ -525,11 +615,11 @@ function draw() {
   // Platforms
   for (const p of platforms) {
     if (p.type === "goal") {
-      const mgr = sprites["manager"];
-      if (mgr) {
+      const goalSprite = level <= 3 ? sprites["safety-jd"] : sprites["manager"];
+      if (goalSprite) {
         const drawH = 62;
-        const drawW = drawH; // 1:1 aspect
-        ctx.drawImage(mgr, p.x + p.w / 2 - drawW / 2, p.y + p.h - drawH - 2, drawW, drawH);
+        const drawW = drawH;
+        ctx.drawImage(goalSprite, p.x + p.w / 2 - drawW / 2, p.y + p.h - drawH - 2, drawW, drawH);
       } else {
         ctx.fillStyle = "#2ecc71";
         ctx.fillRect(p.x, p.y, p.w, p.h);
@@ -761,6 +851,9 @@ function loop() {
   update();
   if (gameState === "playing" || gameState === "question") {
     draw();
+  } else if (gameState === "cinematic") {
+    updateCinematic();
+    drawCinematic();
   }
   requestAnimationFrame(loop);
 }
