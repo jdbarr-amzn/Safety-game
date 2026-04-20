@@ -51,6 +51,7 @@ const SPRITE_DEFS = {
   "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1, drawH: 113, offsetY: 57 },
   "hazard-fire": { src: "sprites/hazard-fire.png", cols: 5, rows: 5, fw: 339, fh: 404, frames: 25, drawH: 70, offsetY: 10 },
   "hazard-electrical": { src: "sprites/hazard-electrical.png", cols: 3, rows: 3, fw: 120, fh: 120, frames: 9, drawH: 70, offsetY: 10, noFlip: true },
+  "manager": { src: "sprites/manager.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1 },
 };
 const ANIM_SPEED = 0.4; // frames per game tick
 
@@ -191,7 +192,11 @@ function generateLevel(lvl) {
     questionTriggers.push({ x, y: groundY - 50, w: 36, h: 36, used: false });
   }
 
-  // Goal flag
+  // Manager goal — ensure ground exists beneath
+  // Add ground under goal if missing
+  if (!hasGround(goalX)) {
+    platforms.push({ x: goalX - 50, y: groundY, w: 200, h: 40, type: "ground" });
+  }
   platforms.push({ x: goalX, y: groundY - 60, w: 60, h: 60, type: "goal" });
 }
 
@@ -520,10 +525,17 @@ function draw() {
   // Platforms
   for (const p of platforms) {
     if (p.type === "goal") {
-      ctx.fillStyle = "#2ecc71";
-      ctx.fillRect(p.x, p.y, p.w, p.h);
-      ctx.font = "28px serif";
-      ctx.fillText("🚩", p.x + 14, p.y + 36);
+      const mgr = sprites["manager"];
+      if (mgr) {
+        const drawH = 80;
+        const drawW = drawH; // 1:1 aspect
+        ctx.drawImage(mgr, p.x + p.w / 2 - drawW / 2, p.y + p.h - drawH - 2, drawW, drawH);
+      } else {
+        ctx.fillStyle = "#2ecc71";
+        ctx.fillRect(p.x, p.y, p.w, p.h);
+        ctx.font = "28px serif";
+        ctx.fillText("🚩", p.x + 14, p.y + 36);
+      }
     } else if (p.type === "ground") {
       ctx.fillStyle = "#5a5a5a";
       ctx.fillRect(p.x, p.y, p.w, p.h);
