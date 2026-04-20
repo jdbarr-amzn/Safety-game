@@ -77,6 +77,7 @@ const TILE_NAMES = {
   beam1: "IndustrialTile_07", beam2: "IndustrialTile_08", hazardStripe: "IndustrialTile_09",
   platLeft: "IndustrialTile_31", platMid: "IndustrialTile_32", platRight: "IndustrialTile_33",
   floorFill: "IndustrialTile_34", floorFill2: "IndustrialTile_35",
+  raisedPlatform: "Raised Platform A",
 };
 const OBJ_NAMES = ["Locker1", "Locker2", "Barrel1", "Barrel2", "Box1", "Box2", "Fire-extinguisher1", "Fence1", "Fall indicator", "Box3", "Box4"];
 const objImages = {};
@@ -763,16 +764,16 @@ function draw() {
         ctx.fillRect(p.x, p.y, p.w, 3);
       }
     } else {
-      // Tiled floating platform
-      const tL = tiles.platLeft;
-      const tM = tiles.platMid;
-      const tR = tiles.platRight;
-      if (tL && tM && tR) {
-        ctx.drawImage(tL, p.x, p.y - 8, ts, ts);
-        for (let x = p.x + ts; x < p.x + p.w - ts; x += ts) {
-          ctx.drawImage(tM, x, p.y - 8, ts, ts);
+      // Raised platform sprite
+      const rp = tiles.raisedPlatform;
+      if (rp) {
+        // Tile the raised platform across the width, keeping aspect ratio for height
+        const rpH = 80;
+        const rpW = rpH; // 1:1 aspect (120x120 source)
+        for (let x = p.x; x < p.x + p.w; x += rpW) {
+          const drawW = Math.min(rpW, p.x + p.w - x);
+          ctx.drawImage(rp, 0, 0, (drawW / rpW) * 120, 120, x, p.y - rpH + 16, drawW, rpH);
         }
-        ctx.drawImage(tR, p.x + p.w - ts, p.y - 8, ts, ts);
       } else {
         ctx.fillStyle = "#6a6a6a";
         ctx.fillRect(p.x, p.y, p.w, p.h);
