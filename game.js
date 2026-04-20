@@ -51,7 +51,7 @@ const SPRITE_DEFS = {
   "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1, drawH: 113, offsetY: 57 },
   "hazard-fire": { src: "sprites/hazard-fire.png", cols: 5, rows: 5, fw: 339, fh: 404, frames: 25, drawH: 70, offsetY: 10, noFlip: true },
   "hazard-electrical": { src: "sprites/hazard-electrical.png", cols: 3, rows: 3, fw: 120, fh: 120, frames: 9, drawH: 70, offsetY: 10, noFlip: true },
-  "hazard-chemical": { src: "sprites/hazard-chemical.png", cols: 1, rows: 1, fw: 791, fh: 791, frames: 1, drawH: 70, offsetY: 15, noFlip: true },
+  "hazard-chemical": { src: "sprites/hazard-chemical.png", cols: 1, rows: 1, fw: 791, fh: 791, frames: 1, drawH: 70, offsetY: 45, noFlip: true },
   "manager": { src: "sprites/manager.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1 },
   "safety-jd": { src: "sprites/safety-jd.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1 },
   "jd-profile": { src: "sprites/jd-profile.png", cols: 1, rows: 1, fw: 375, fh: 666, frames: 1 },
@@ -165,9 +165,17 @@ function generateLevel(lvl) {
     return grounds.some(p => x >= p.x && x + 30 <= p.x + p.w);
   }
 
+  // Helper: check if position overlaps any placed object
+  const placedObjects = [];
+  const MIN_SPACING = 80;
+  function tooClose(x) {
+    return placedObjects.some(px => Math.abs(px - x) < MIN_SPACING);
+  }
+  function placeAt(x) { placedObjects.push(x); }
+
   // Hazards on ground
   for (let x = 500; x < goalX - 100; x += 200 + Math.random() * 300) {
-    if (!hasGround(x)) continue;
+    if (!hasGround(x) || tooClose(x)) continue;
     const ht = HAZARD_TYPES[Math.floor(Math.random() * HAZARD_TYPES.length)];
     const h = { x, y: groundY - 30, w: 30, h: 30, type: ht, timer: Math.random() * 6, facing: 1 };
     if (ht.patrols) {
@@ -176,11 +184,13 @@ function generateLevel(lvl) {
       h.patrolSpeed = 0.5 + Math.random() * 0.5;
     }
     hazards.push(h);
+    placeAt(x);
   }
 
   // Power-ups
   const floats = platforms.filter(p => p.type === "float");
   for (let x = 400; x < goalX - 100; x += 400 + Math.random() * 400) {
+    if (tooClose(x)) continue;
     const pt = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
     let anchorY = groundY;
     for (const f of floats) {
@@ -188,12 +198,14 @@ function generateLevel(lvl) {
     }
     const py = anchorY - 30 - Math.random() * 40;
     powerups.push({ x, y: Math.max(40, py), w: 28, h: 28, type: pt, collected: false, bob: Math.random() * Math.PI * 2 });
+    placeAt(x);
   }
 
   // Question triggers
   for (let x = 600; x < goalX - 100; x += 500 + Math.random() * 400) {
-    if (!hasGround(x)) continue;
+    if (!hasGround(x) || tooClose(x)) continue;
     questionTriggers.push({ x, y: groundY - 50, w: 36, h: 36, used: false });
+    placeAt(x);
   }
 
   // Manager goal — ensure ground exists beneath
