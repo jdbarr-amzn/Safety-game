@@ -213,15 +213,16 @@ function generateLevel(lvl) {
     placeAt(x);
   }
 
-  // Power-ups
+  // Power-ups — only on solid ground or above floating platforms, not over pitfalls
   const floats = platforms.filter(p => p.type === "float");
   for (let x = 400; x < goalX - 100; x += 400 + Math.random() * 400) {
     if (tooClose(x)) continue;
+    // Must have ground or a nearby float platform
+    const nearFloat = floats.find(f => Math.abs(f.x + f.w / 2 - x) < 80);
+    if (!hasGround(x) && !nearFloat) continue;
     const pt = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
     let anchorY = groundY;
-    for (const f of floats) {
-      if (Math.abs(f.x - x) < 150) { anchorY = Math.min(anchorY, f.y); }
-    }
+    if (nearFloat) anchorY = nearFloat.y;
     const py = anchorY - 30 - Math.random() * 40;
     powerups.push({ x, y: Math.max(40, py), w: 36, h: 36, type: pt, collected: false, bob: Math.random() * Math.PI * 2 });
     placeAt(x);
