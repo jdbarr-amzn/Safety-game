@@ -48,7 +48,7 @@ const SPRITE_DEFS = {
   "player-run":    { src: "sprites/player-run.png",    cols: 5, rows: 5, fw: 396, fh: 534, frames: 25 },
   "player-jump":   { src: "sprites/player-jump.png",   cols: 5, rows: 5, fw: 324, fh: 610, frames: 25 },
   "player-shield": { src: "sprites/player-shield.png", cols: 5, rows: 5, fw: 252, fh: 520, frames: 25 },
-  "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1, drawH: 113, offsetY: 50 },
+  "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1, drawH: 113, offsetY: 65 },
   "hazard-fire": { src: "sprites/hazard-fire.png", cols: 5, rows: 5, fw: 339, fh: 404, frames: 25, drawH: 70, offsetY: 10 },
 };
 const ANIM_SPEED = 0.4; // frames per game tick
