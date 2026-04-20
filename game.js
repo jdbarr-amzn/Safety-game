@@ -32,7 +32,7 @@ const POWERUP_TYPES = [
 // ── Canvas ──
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-const W = 640, H = 360;
+const W = 832, H = 468;
 
 // ── Sprite Loading ──
 // Place your sprites in the sprites/ folder. Supported player sprites:
