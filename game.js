@@ -51,7 +51,7 @@ const SPRITE_DEFS = {
   "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1, drawH: 113, offsetY: 57 },
   "hazard-fire": { src: "sprites/hazard-fire.png", cols: 5, rows: 5, fw: 339, fh: 404, frames: 25, drawH: 70, offsetY: 10, noFlip: true },
   "hazard-electrical": { src: "sprites/hazard-electrical.png", cols: 3, rows: 3, fw: 120, fh: 120, frames: 9, drawH: 70, offsetY: 10, noFlip: true },
-  "hazard-chemical": { src: "sprites/hazard-chemical.png", cols: 1, rows: 1, fw: 791, fh: 791, frames: 1, drawH: 105, offsetY: 30, noFlip: true },
+  "hazard-chemical": { src: "sprites/hazard-chemical.png", cols: 1, rows: 1, fw: 791, fh: 791, frames: 1, drawH: 84, offsetY: 48, noFlip: true },
   "manager": { src: "sprites/manager.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1 },
   "safety-jd": { src: "sprites/safety-jd.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1 },
   "jd-profile": { src: "sprites/jd-profile.png", cols: 1, rows: 1, fw: 375, fh: 666, frames: 1 },
