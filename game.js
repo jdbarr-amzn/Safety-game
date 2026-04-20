@@ -527,7 +527,7 @@ function draw() {
     if (p.type === "goal") {
       const mgr = sprites["manager"];
       if (mgr) {
-        const drawH = 80;
+        const drawH = 62;
         const drawW = drawH; // 1:1 aspect
         ctx.drawImage(mgr, p.x + p.w / 2 - drawW / 2, p.y + p.h - drawH - 2, drawW, drawH);
       } else {
