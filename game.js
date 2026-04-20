@@ -48,8 +48,8 @@ const SPRITE_DEFS = {
   "player-run":    { src: "sprites/player-run.png",    cols: 5, rows: 5, fw: 396, fh: 534, frames: 25 },
   "player-jump":   { src: "sprites/player-jump.png",   cols: 5, rows: 5, fw: 324, fh: 610, frames: 25 },
   "player-shield": { src: "sprites/player-shield.png", cols: 5, rows: 5, fw: 252, fh: 520, frames: 25 },
-  "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1 },
-  "hazard-fire": { src: "sprites/hazard-fire.png", cols: 5, rows: 5, fw: 339, fh: 404, frames: 25 },
+  "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1, drawH: 113, offsetY: 14 },
+  "hazard-fire": { src: "sprites/hazard-fire.png", cols: 5, rows: 5, fw: 339, fh: 404, frames: 25, drawH: 70, offsetY: 10 },
 };
 const ANIM_SPEED = 0.4; // frames per game tick
 
@@ -556,14 +556,13 @@ function draw() {
     const spr = h.type.sprite ? sprites[h.type.sprite] : null;
 
     if (spr && def) {
-      // Animated sprite — facing synced to frame cycle
       const frameIdx = Math.floor(h.timer * 8) % def.frames;
       const col = frameIdx % def.cols;
       const row = Math.floor(frameIdx / def.cols);
       const aspect = def.fw / def.fh;
-      const drawH = def.frames === 1 ? 113 : 70; // static sprites larger, animated smaller
+      const drawH = def.drawH || 70;
       const drawW = drawH * aspect;
-      const anchorY = h.y + h.h; // bottom of hitbox = surface level
+      const anchorY = h.y + h.h + (def.offsetY || 0);
       ctx.save();
       ctx.translate(h.x + h.w / 2, anchorY);
       const frameFacing = def.frames > 1 ? (frameIdx < def.frames / 2 ? 1 : -1) : 1;
