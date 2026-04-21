@@ -790,7 +790,7 @@ function draw() {
         const startX = p.x + (p.w - totalW) / 2;
         // Pillar columns from platform down to ground
         const groundY = H - 40;
-        const pillarTop = p.y + 4;
+        const pillarTop = p.y - 8;
         const pillarBottom = groundY;
         const colSpacing = Math.max(totalW, ts); // one column per platform unit
         for (let i = 0; i < count; i++) {
@@ -804,7 +804,7 @@ function draw() {
         }
         // Draw Platform A on top
         for (let i = 0; i < count; i++) {
-          ctx.drawImage(platImg, startX + i * platW, p.y - platH + 4, platW, platH);
+          ctx.drawImage(platImg, startX + i * platW, p.y - platH - 8, platW, platH);
         }
       } else {
         ctx.fillStyle = "#6a6a6a";
