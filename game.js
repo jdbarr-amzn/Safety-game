@@ -312,8 +312,8 @@ function update() {
     }
     if (player.vy >= 0 &&
         player.x + player.w > p.x && player.x < p.x + p.w &&
-        player.y + player.h >= p.y && player.y + player.h <= p.y + 14 + player.vy) {
-      player.y = p.y - player.h;
+        player.y + player.h >= p.y - (p.type === "float" ? 8 : 0) && player.y + player.h <= p.y + 14 + player.vy) {
+      player.y = p.y - player.h - (p.type === "float" ? 8 : 0);
       player.vy = 0;
       player.onGround = true;
     }
@@ -790,7 +790,8 @@ function draw() {
         const startX = p.x + (p.w - totalW) / 2;
         // Pillar columns from platform down to ground
         const groundY = H - 40;
-        const pillarTop = p.y + platH - 10;
+        const platOffset = 18;
+        const pillarTop = p.y + platH - platOffset;
         const pillarBottom = groundY;
         for (let i = 0; i < count; i++) {
           const cx = startX + i * platW + platW / 2 - ts / 2;
@@ -801,7 +802,7 @@ function draw() {
         }
         // Draw Platform A — top surface at p.y
         for (let i = 0; i < count; i++) {
-          ctx.drawImage(platImg, startX + i * platW, p.y - 10, platW, platH);
+          ctx.drawImage(platImg, startX + i * platW, p.y - platOffset, platW, platH);
         }
       } else {
         ctx.fillStyle = "#6a6a6a";
