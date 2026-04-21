@@ -168,16 +168,23 @@ function generateLevel(lvl) {
     }
   }
 
-  // Floating platforms — placed as reachable chains from ground level
+  // Helper: check if x position has ground beneath it
+  const grounds = platforms.filter(p => p.type === "ground");
+  function hasGround(x) {
+    return grounds.some(p => x >= p.x && x + 30 <= p.x + p.w);
+  }
+
+  // Floating platforms — placed as reachable chains from ground level, only over solid ground
   let lastY = groundY;
   for (let x = 300; x < goalX - 150; x += 120 + Math.random() * 160) {
+    const w = 80 + Math.random() * 80;
+    if (!hasGround(x) || !hasGround(x + w - 30)) { continue; }
     const dir = Math.random() < 0.6 ? -1 : 1;
     let y = lastY + dir * (40 + Math.random() * (MAX_STEP - 40));
     y = Math.max(groundY - 260, Math.min(groundY - 60, y));
     if (y < groundY - MAX_STEP) {
       if (lastY - y > MAX_STEP) y = lastY - MAX_STEP;
     }
-    const w = 80 + Math.random() * 80;
     platforms.push({ x, y, w, h: 16, type: "float" });
     if (Math.random() > 0.4) {
       coins.push({ x: x + w / 2 - 8, y: y - 43, w: 22, h: 22, collected: false });
@@ -187,12 +194,6 @@ function generateLevel(lvl) {
     }
     lastY = y;
     if (Math.random() < 0.3) lastY = groundY;
-  }
-
-  // Helper: check if x position has ground beneath it
-  const grounds = platforms.filter(p => p.type === "ground");
-  function hasGround(x) {
-    return grounds.some(p => x >= p.x && x + 30 <= p.x + p.w);
   }
 
   // Helper: check if position overlaps any placed object
