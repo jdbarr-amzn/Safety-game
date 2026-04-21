@@ -151,8 +151,9 @@ document.getElementById("go-menu-btn").addEventListener("click", () => showScree
 document.getElementById("back-btn").addEventListener("click", () => showScreen("menu"));
 
 // ── Level Generation ──
-// Max jump height ~110px (vy=-11, gravity=0.55). Keep step heights ≤90px so everything is reachable.
-const MAX_STEP = 85;
+// Jump: vy=-11.9, gravity=0.48. Max height ~147px, max horizontal ~248px.
+const MAX_STEP = 120; // max height difference between platforms (with margin)
+const MAX_GAP = 180;  // max pitfall width player can jump across
 
 function generateLevel(lvl) {
   platforms = []; hazards = []; powerups = []; coins = []; questionTriggers = []; fallingBoxes = [];
@@ -161,11 +162,22 @@ function generateLevel(lvl) {
 
   const goalX = levelWidth - 100;
 
-  // Ground segments
+  // Ground segments — gaps limited to jumpable width
+  let lastGroundEnd = 0;
   for (let x = 0; x < levelWidth; x += 200) {
-    if (Math.random() > 0.15 || x < 400) {
+    if (x < 400 || Math.random() > 0.15) {
+      // Check if gap since last ground is too wide
+      if (x - lastGroundEnd > MAX_GAP) {
+        // Fill in ground to keep gap jumpable
+        platforms.push({ x: lastGroundEnd, y: groundY, w: x - lastGroundEnd, h: 40, type: "ground" });
+      }
       platforms.push({ x, y: groundY, w: 200, h: 40, type: "ground" });
+      lastGroundEnd = x + 200;
     }
+  }
+  // Ensure no trailing gap too wide before goal
+  if (levelWidth - lastGroundEnd > MAX_GAP) {
+    platforms.push({ x: lastGroundEnd, y: groundY, w: 200, h: 40, type: "ground" });
   }
 
   // Helper: check if x position has ground beneath it
@@ -174,17 +186,16 @@ function generateLevel(lvl) {
     return grounds.some(p => x >= p.x && x + 30 <= p.x + p.w);
   }
 
-  // Floating platforms — placed as reachable chains from ground level, only over solid ground
+  // Floating platforms — all reachable from ground with a single jump
   let lastY = groundY;
   for (let x = 300; x < goalX - 150; x += 120 + Math.random() * 160) {
     const w = 80 + Math.random() * 80;
     if (!hasGround(x) || !hasGround(x + w - 30)) { continue; }
     const dir = Math.random() < 0.6 ? -1 : 1;
     let y = lastY + dir * (40 + Math.random() * (MAX_STEP - 40));
-    y = Math.max(groundY - 260, Math.min(groundY - 60, y));
-    if (y < groundY - MAX_STEP) {
-      if (lastY - y > MAX_STEP) y = lastY - MAX_STEP;
-    }
+    // Clamp: must be reachable from ground in one jump, and from previous platform
+    y = Math.max(groundY - MAX_STEP, Math.min(groundY - 60, y));
+    if (lastY - y > MAX_STEP) y = lastY - MAX_STEP;
     platforms.push({ x, y, w, h: 16, type: "float" });
     if (Math.random() > 0.4) {
       coins.push({ x: x + w / 2 - 8, y: y - 43, w: 22, h: 22, collected: false });
