@@ -180,10 +180,10 @@ function generateLevel(lvl) {
     const w = 80 + Math.random() * 80;
     platforms.push({ x, y, w, h: 16, type: "float" });
     if (Math.random() > 0.4) {
-      coins.push({ x: x + w / 2 - 8, y: y - 25, w: 22, h: 22, collected: false });
+      coins.push({ x: x + w / 2 - 8, y: y - 43, w: 22, h: 22, collected: false });
     } else if (Math.random() < 0.3) {
       const ht = HAZARD_TYPES[Math.floor(Math.random() * HAZARD_TYPES.length)];
-      hazards.push({ x: x + w / 2 - 20, y: y - 50, w: 40, h: 40, type: ht, timer: Math.random() * 6 });
+      hazards.push({ x: x + w / 2 - 20, y: y - 68, w: 40, h: 40, type: ht, timer: Math.random() * 6 });
     }
     lastY = y;
     if (Math.random() < 0.3) lastY = groundY;
