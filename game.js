@@ -80,7 +80,7 @@ const TILE_NAMES = {
   platformA: "Platform A",
   pillarMid: "IndustrialTile_61",
   pillarBase: "IndustrialTile_70",
-  railing: "Railing A",
+  railing: "Railing medium",
 };
 const OBJ_NAMES = ["Locker1", "Locker2", "Barrel1", "Barrel2", "Box1", "Box2", "Fire-extinguisher1", "Fence1", "Fall indicator", "Box3", "Box4"];
 const objImages = {};
@@ -978,8 +978,8 @@ function draw() {
   const railImg = tiles.railing;
   if (railImg) {
     for (const r of railings) {
-      const rH = 36; // half player height
-      const rW = rH * (96 / 16); // preserve aspect ratio
+      const rH = 25; // 30% smaller
+      const rW = rH * (53 / 16); // preserve aspect ratio
       for (let i = 0; i < r.count; i++) {
         ctx.drawImage(railImg, r.x + i * rW, r.y - rH, rW, rH);
       }
