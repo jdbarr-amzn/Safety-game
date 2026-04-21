@@ -310,10 +310,11 @@ function update() {
       if (overlap(player, p)) { nextLevel(); return; }
       continue;
     }
+    const collideY = p.type === "float" ? p.y - 18 : p.y;
     if (player.vy >= 0 &&
         player.x + player.w > p.x && player.x < p.x + p.w &&
-        player.y + player.h >= p.y - (p.type === "float" ? 8 : 0) && player.y + player.h <= p.y + 14 + player.vy) {
-      player.y = p.y - player.h - (p.type === "float" ? 8 : 0);
+        player.y + player.h >= collideY && player.y + player.h <= collideY + 14 + player.vy) {
+      player.y = collideY - player.h;
       player.vy = 0;
       player.onGround = true;
     }
