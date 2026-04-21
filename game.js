@@ -215,6 +215,15 @@ function generateLevel(lvl) {
   }
   function placeAt(x) { placedObjects.push(x); }
 
+  // Railings — spawn first so hazards avoid them
+  railings = [];
+  for (let x = 300; x < goalX - 200; x += 300 + Math.random() * 400) {
+    if (!hasGround(x) || tooClose(x)) continue;
+    const count = 1 + Math.floor(Math.random() * 3);
+    railings.push({ x, y: groundY, count });
+    placeAt(x);
+  }
+
   // Hazards on ground
   for (let x = 500; x < goalX - 100; x += 200 + Math.random() * 300) {
     if (!hasGround(x) || tooClose(x)) continue;
@@ -248,15 +257,6 @@ function generateLevel(lvl) {
   for (let x = 600; x < goalX - 100; x += 500 + Math.random() * 400) {
     if (!hasGround(x) || tooClose(x)) continue;
     questionTriggers.push({ x, y: groundY - 50, w: 46, h: 46, used: false });
-    placeAt(x);
-  }
-
-  // Railings — decorative foreground objects on solid ground, not near hazards/pitfalls
-  railings = [];
-  for (let x = 300; x < goalX - 200; x += 300 + Math.random() * 400) {
-    if (!hasGround(x) || tooClose(x)) continue;
-    const count = 1 + Math.floor(Math.random() * 3); // 1-3 units
-    railings.push({ x, y: groundY, count });
     placeAt(x);
   }
 
