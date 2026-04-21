@@ -77,7 +77,9 @@ const TILE_NAMES = {
   beam1: "IndustrialTile_07", beam2: "IndustrialTile_08", hazardStripe: "IndustrialTile_09",
   platLeft: "IndustrialTile_31", platMid: "IndustrialTile_32", platRight: "IndustrialTile_33",
   floorFill: "IndustrialTile_34", floorFill2: "IndustrialTile_35",
-  raisedPlatform: "Raised Platform A",
+  platformA: "Platform A",
+  pillarMid: "IndustrialTile_61",
+  pillarBase: "IndustrialTile_70",
   railing: "Railing A",
 };
 const OBJ_NAMES = ["Locker1", "Locker2", "Barrel1", "Barrel2", "Box1", "Box2", "Fire-extinguisher1", "Fence1", "Fall indicator", "Box3", "Box4"];
@@ -774,17 +776,35 @@ function draw() {
         ctx.fillRect(p.x, p.y, p.w, 3);
       }
     } else {
-      // Raised platform sprite — whole units, doubled for longer platforms
-      const rp = tiles.raisedPlatform;
-      if (rp) {
-        const aspect = 98 / 111;
-        const rpH = 80;
-        const rpW = rpH * aspect;
-        const count = Math.max(1, Math.round(p.w / rpW));
-        const totalW = count * rpW;
+      // Platform A on top of stacked pillar tiles (61) with base (70)
+      const platImg = tiles.platformA;
+      const pillarMid = tiles.pillarMid;
+      const pillarBase = tiles.pillarBase;
+      if (platImg && pillarMid && pillarBase) {
+        const ts = 32;
+        // Platform A on top — whole units, doubled for width
+        const platH = 24; // draw height for platform top
+        const platW = platH * (96 / 47);
+        const count = Math.max(1, Math.round(p.w / platW));
+        const totalW = count * platW;
         const startX = p.x + (p.w - totalW) / 2;
+        // Pillar columns from platform down to ground
+        const groundY = H - 40;
+        const pillarTop = p.y + 4;
+        const pillarBottom = groundY;
+        const colSpacing = Math.max(totalW, ts); // one column per platform unit
         for (let i = 0; i < count; i++) {
-          ctx.drawImage(rp, startX + i * rpW, p.y - rpH + 16, rpW, rpH);
+          const cx = startX + i * platW + platW / 2 - ts / 2;
+          // Stack tile 61 from top to bottom
+          for (let y = pillarTop; y < pillarBottom - ts; y += ts) {
+            ctx.drawImage(pillarMid, cx, y, ts, ts);
+          }
+          // Base tile 70 at bottom
+          ctx.drawImage(pillarBase, cx, pillarBottom - ts, ts, ts);
+        }
+        // Draw Platform A on top
+        for (let i = 0; i < count; i++) {
+          ctx.drawImage(platImg, startX + i * platW, p.y - platH + 4, platW, platH);
         }
       } else {
         ctx.fillStyle = "#6a6a6a";
