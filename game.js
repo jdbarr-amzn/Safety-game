@@ -212,7 +212,7 @@ function generateLevel(lvl) {
       coins.push({ x: x + w / 2 - 8, y: y - 43, w: 22, h: 22, collected: false });
     } else if (seededRandom() < 0.3) {
       const ht = HAZARD_TYPES[Math.floor(seededRandom() * HAZARD_TYPES.length)];
-      hazards.push({ x: x + w / 2 - 20, y: y - 50, w: 40, h: 40, type: ht, timer: seededRandom() * 6 });
+      hazards.push({ x: x + w / 2 - 20, y: y - 60, w: 40, h: 40, type: ht, timer: seededRandom() * 6 });
     }
     lastY = y;
     if (seededRandom() < 0.3) lastY = groundY;
