@@ -802,12 +802,12 @@ function draw() {
 
   ctx.save();
   if (goalZooming && goalTarget) {
-    // Focus on goal character, don't show past it
+    // Focus on goal, floor aligned with bottom of frame
     const focusX = goalTarget.x + goalTarget.w / 2;
-    const focusY = goalTarget.y;
-    ctx.translate(W / 2, H / 2);
+    const groundY = H - 40;
+    ctx.translate(W / 2, H);
     ctx.scale(goalZoomScale, goalZoomScale);
-    ctx.translate(-focusX + 60, -focusY + 40);
+    ctx.translate(-focusX + 60, -groundY);
   } else {
     ctx.translate(-cameraX, 0);
   }
