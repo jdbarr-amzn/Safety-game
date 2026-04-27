@@ -80,6 +80,9 @@ const TILE_NAMES = {
   platformA: "Platform A",
   pillarMid: "IndustrialTile_61",
   pillarBase: "IndustrialTile_70",
+  raisedPlat3: "Raised platform 3",
+  raisedPlat4: "Raised Platform 4",
+  raisedPlatDouble: "Raised Platform Double",
   railing: "Railing medium",
 };
 const OBJ_NAMES = ["Locker1", "Locker2", "Barrel1", "Barrel2", "Box1", "Box2", "Fire-extinguisher1", "Fence1", "Fall indicator", "Box3", "Box4"];
@@ -155,8 +158,87 @@ document.getElementById("back-btn").addEventListener("click", () => showScreen("
 const MAX_STEP = 120; // max height difference between platforms (with margin)
 const MAX_GAP = 180;  // max pitfall width player can jump across
 
+// ── Hand-designed Level 1 ──
+function generateLevel1() {
+  const groundY = H - 40;
+  platforms = []; hazards = []; powerups = []; coins = []; questionTriggers = []; fallingBoxes = []; railings = [];
+
+  // Continuous ground with a few gaps
+  const groundSegs = [
+    [0, 500], [500, 200], // gap at 700-850
+    [850, 300], [1150, 200], // gap at 1350-1500
+    [1500, 400], [1900, 300], // gap at 2200-2350
+    [2350, 500],
+  ];
+  for (const [x, w] of groundSegs) {
+    platforms.push({ x, y: groundY, w, h: 40, type: "ground" });
+  }
+
+  // Raised platforms (using raisedPlat3, raisedPlat4, raisedPlatDouble)
+  // These are visual + collision. "sprite" field tells draw which image to use.
+  const raisedPlatforms = [
+    { x: 350, y: groundY - 100, w: 98, h: 16, type: "float", raisedSprite: "raisedPlat3" },
+    { x: 600, y: groundY - 80, w: 98, h: 16, type: "float", raisedSprite: "raisedPlat4" },
+    { x: 950, y: groundY - 110, w: 164, h: 16, type: "float", raisedSprite: "raisedPlatDouble" },
+    { x: 1250, y: groundY - 90, w: 98, h: 16, type: "float", raisedSprite: "raisedPlat3" },
+    { x: 1600, y: groundY - 100, w: 98, h: 16, type: "float", raisedSprite: "raisedPlat4" },
+    { x: 1850, y: groundY - 80, w: 164, h: 16, type: "float", raisedSprite: "raisedPlatDouble" },
+    { x: 2150, y: groundY - 110, w: 98, h: 16, type: "float", raisedSprite: "raisedPlat3" },
+    { x: 2500, y: groundY - 90, w: 98, h: 16, type: "float", raisedSprite: "raisedPlat4" },
+  ];
+  for (const rp of raisedPlatforms) platforms.push(rp);
+
+  // Coins — on platforms and ground
+  const coinPositions = [
+    [380, groundY - 140], [420, groundY - 140],
+    [630, groundY - 120], [670, groundY - 120],
+    [980, groundY - 150], [1020, groundY - 150], [1060, groundY - 150],
+    [1280, groundY - 130],
+    [1630, groundY - 140], [1670, groundY - 140],
+    [1880, groundY - 120], [1920, groundY - 120], [1960, groundY - 120],
+    [2180, groundY - 150],
+    [2530, groundY - 130], [2570, groundY - 130],
+    // Ground coins
+    [150, groundY - 25], [200, groundY - 25], [250, groundY - 25],
+    [1550, groundY - 25], [1600, groundY - 25],
+    [2400, groundY - 25], [2450, groundY - 25],
+  ];
+  for (const [x, y] of coinPositions) {
+    coins.push({ x, y, w: 22, h: 22, collected: false });
+  }
+
+  // Hazards — fire and chemical on ground
+  hazards.push({ x: 450, y: groundY - 42, w: 40, h: 40, type: HAZARD_TYPES[3], timer: 0, facing: 1 }); // Fire
+  hazards.push({ x: 1100, y: groundY - 42, w: 40, h: 40, type: HAZARD_TYPES[2], timer: 0, facing: 1 }); // Chemical
+  hazards.push({ x: 1700, y: groundY - 42, w: 40, h: 40, type: HAZARD_TYPES[0], timer: 0, facing: 1 }); // Wet Floor
+  hazards.push({ x: 2000, y: groundY - 42, w: 40, h: 40, type: HAZARD_TYPES[3], timer: 0, facing: 1 }); // Fire
+  hazards.push({ x: 2600, y: groundY - 42, w: 40, h: 40, type: HAZARD_TYPES[1], timer: 0, facing: 1 }); // Electrical
+
+  // Railings
+  railings.push({ x: 100, y: groundY, count: 2 });
+  railings.push({ x: 900, y: groundY, count: 1 });
+  railings.push({ x: 1550, y: groundY, count: 2 });
+  railings.push({ x: 2400, y: groundY, count: 1 });
+
+  // Power-ups
+  powerups.push({ x: 300, y: groundY - 70, w: 36, h: 36, type: POWERUP_TYPES[0], collected: false, bob: 0 }); // Hard Hat
+  powerups.push({ x: 1400, y: groundY - 70, w: 36, h: 36, type: POWERUP_TYPES[1], collected: false, bob: 1 }); // Safety Boots
+  powerups.push({ x: 2300, y: groundY - 70, w: 36, h: 36, type: POWERUP_TYPES[2], collected: false, bob: 2 }); // First Aid
+
+  // Question triggers
+  questionTriggers.push({ x: 800, y: groundY - 50, w: 46, h: 46, used: false });
+  questionTriggers.push({ x: 1800, y: groundY - 50, w: 46, h: 46, used: false });
+
+  // Goal — Safety JD
+  platforms.push({ x: 2750, y: groundY, w: 200, h: 40, type: "ground" });
+  platforms.push({ x: 2800, y: groundY - 60, w: 60, h: 60, type: "goal" });
+}
+
 function generateLevel(lvl) {
-  platforms = []; hazards = []; powerups = []; coins = []; questionTriggers = []; fallingBoxes = [];
+  if (lvl === 1) { generateLevel1(); return; }
+
+  // Procedural levels for 2+
+  platforms = []; hazards = []; powerups = []; coins = []; questionTriggers = []; fallingBoxes = []; railings = [];
   const groundY = H - 40;
   const levelWidth = 3000 + lvl * 1000;
 
@@ -789,39 +871,45 @@ function draw() {
         ctx.fillRect(p.x, p.y, p.w, 3);
       }
     } else {
-      // Platform A on top of stacked pillar tiles (61) with base (70)
-      const platImg = tiles.platformA;
-      const pillarMid = tiles.pillarMid;
-      const pillarBase = tiles.pillarBase;
-      if (platImg && pillarMid && pillarBase) {
-        const ts = 32;
-        // Platform A on top — whole units, doubled for width
-        const platH = 24; // draw height for platform top
-        const platW = platH * (96 / 47);
-        const count = Math.max(1, Math.round(p.w / platW));
-        const totalW = count * platW;
-        const startX = p.x + (p.w - totalW) / 2;
-        // Pillar columns from platform down to ground
-        const groundY = H - 40;
-        const platOffset = 18;
-        const pillarTop = p.y + platH - platOffset;
-        const pillarBottom = groundY;
-        for (let i = 0; i < count; i++) {
-          const cx = startX + i * platW + platW / 2 - ts / 2;
-          for (let y = pillarTop; y < pillarBottom - ts; y += ts) {
-            ctx.drawImage(pillarMid, cx, y, ts, ts);
-          }
-          ctx.drawImage(pillarBase, cx, pillarBottom - ts, ts, ts);
-        }
-        // Draw Platform A — top surface at p.y
-        for (let i = 0; i < count; i++) {
-          ctx.drawImage(platImg, startX + i * platW, p.y - platOffset, platW, platH);
-        }
+      // Check for raised platform sprite (hand-designed levels)
+      if (p.raisedSprite && tiles[p.raisedSprite]) {
+        const rImg = tiles[p.raisedSprite];
+        const aspect = rImg.naturalWidth / rImg.naturalHeight;
+        const drawH = rImg.naturalHeight * 0.7;
+        const drawW = drawH * aspect;
+        ctx.drawImage(rImg, p.x, p.y - drawH + 18, drawW, drawH);
       } else {
-        ctx.fillStyle = "#6a6a6a";
-        ctx.fillRect(p.x, p.y, p.w, p.h);
-        ctx.fillStyle = "#888";
-        ctx.fillRect(p.x, p.y, p.w, 2);
+        // Platform A on top of stacked pillar tiles (61) with base (70)
+        const platImg = tiles.platformA;
+        const pillarMid = tiles.pillarMid;
+        const pillarBase = tiles.pillarBase;
+        if (platImg && pillarMid && pillarBase) {
+          const ts = 32;
+          const platH = 24;
+          const platW = platH * (96 / 47);
+          const count = Math.max(1, Math.round(p.w / platW));
+          const totalW = count * platW;
+          const startX = p.x + (p.w - totalW) / 2;
+          const groundY = H - 40;
+          const platOffset = 18;
+          const pillarTop = p.y + platH - platOffset;
+          const pillarBottom = groundY;
+          for (let i = 0; i < count; i++) {
+            const cx = startX + i * platW + platW / 2 - ts / 2;
+            for (let y = pillarTop; y < pillarBottom - ts; y += ts) {
+              ctx.drawImage(pillarMid, cx, y, ts, ts);
+            }
+            ctx.drawImage(pillarBase, cx, pillarBottom - ts, ts, ts);
+          }
+          for (let i = 0; i < count; i++) {
+            ctx.drawImage(platImg, startX + i * platW, p.y - platOffset, platW, platH);
+          }
+        } else {
+          ctx.fillStyle = "#6a6a6a";
+          ctx.fillRect(p.x, p.y, p.w, p.h);
+          ctx.fillStyle = "#888";
+          ctx.fillRect(p.x, p.y, p.w, 2);
+        }
       }
     }
   }
