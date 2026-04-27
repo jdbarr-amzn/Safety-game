@@ -356,7 +356,7 @@ function update() {
         goalZoomTimer = 0;
         goalTarget = p;
       }
-      if (overlap(player, p) && !goalZooming) { nextLevel(); return; }
+      if (overlap(player, p)) { goalZooming = false; goalZoomScale = 1; nextLevel(); return; }
       continue;
     }
     const collideY = p.type === "float" ? p.y - 18 : p.y;
@@ -485,17 +485,12 @@ function update() {
   // Particles
   particles = particles.filter(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.life--; return p.life > 0; });
 
-  // Goal zoom-in sequence
+  // Goal zoom-in sequence — zoom and hold, player must touch goal to advance
   if (goalZooming) {
     goalZoomTimer++;
-    player.vx = 0;
     goalZoomScale = Math.min(1.5, 1 + goalZoomTimer * 0.005);
-    if (goalZoomTimer > 90) {
-      goalZooming = false;
-      goalZoomScale = 1;
-      nextLevel();
-      return;
-    }
+    // Lock camera once zoomed in
+    if (goalZoomTimer > 90) goalZoomTimer = 90;
   }
 
   // HUD
@@ -807,12 +802,12 @@ function draw() {
 
   ctx.save();
   if (goalZooming && goalTarget) {
-    // Zoom toward the goal and player midpoint
-    const focusX = (player.x + goalTarget.x) / 2;
-    const focusY = (player.y + goalTarget.y) / 2;
+    // Focus on goal character, don't show past it
+    const focusX = goalTarget.x + goalTarget.w / 2;
+    const focusY = goalTarget.y;
     ctx.translate(W / 2, H / 2);
     ctx.scale(goalZoomScale, goalZoomScale);
-    ctx.translate(-focusX, -focusY);
+    ctx.translate(-focusX + 60, -focusY + 40);
   } else {
     ctx.translate(-cameraX, 0);
   }
