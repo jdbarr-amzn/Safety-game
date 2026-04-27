@@ -272,11 +272,28 @@ function generateLevel(lvl) {
   }
 
   // Manager goal — ensure ground exists beneath
-  // Add ground under goal if missing
   if (!hasGround(goalX)) {
     platforms.push({ x: goalX - 50, y: groundY, w: 200, h: 40, type: "ground" });
   }
   platforms.push({ x: goalX, y: groundY - 60, w: 60, h: 60, type: "goal" });
+
+  // Level-specific pitfalls — remove ground segments in specific ranges
+  if (lvl === 1) {
+    // Pitfall between platforms 3 (x~813) and 4 (x~1106): gap at 960-1100
+    // Pitfall between platforms 4 (x~1106) and 5 (x~1801): gap at 1250-1400
+    const pitfalls = [[960, 1100], [1250, 1400]];
+    for (const [gapStart, gapEnd] of pitfalls) {
+      platforms = platforms.filter(p => {
+        if (p.type !== "ground") return true;
+        // Remove ground fully inside the gap
+        if (p.x >= gapStart && p.x + p.w <= gapEnd) return false;
+        // Trim ground that overlaps the gap
+        if (p.x < gapStart && p.x + p.w > gapStart) { p.w = gapStart - p.x; }
+        if (p.x < gapEnd && p.x + p.w > gapEnd) { const oldEnd = p.x + p.w; p.x = gapEnd; p.w = oldEnd - gapEnd; }
+        return true;
+      });
+    }
+  }
 }
 
 // ── Start Game ──
