@@ -107,6 +107,7 @@ let player, platforms, hazards, powerups, coins, particles, questionTriggers, fa
 let score, lives, level, cameraX, playerName, activeEffects, usedQuestions;
 let currentQuestion = null;
 let lastBoxSpawn = 0;
+let goalZooming = false, goalZoomTimer = 0, goalZoomScale = 1, goalTarget = null;
 const keys = {};
 
 // ── UI ──
@@ -304,6 +305,7 @@ function startGame() {
   activeEffects = {}; usedQuestions = new Set(); particles = [];
   player = { x: 50, y: H - 120, w: 40, h: 72, vx: 0, vy: 0, onGround: false, facing: 1, shielded: false, frame: 0 };
   lastBoxSpawn = 0;
+  goalZooming = false; goalZoomTimer = 0; goalZoomScale = 1; goalTarget = null;
   generateLevel(level);
   showScreen("playing");
 }
@@ -347,7 +349,14 @@ function update() {
   // Platform collision
   for (const p of platforms) {
     if (p.type === "goal") {
-      if (overlap(player, p)) { nextLevel(); return; }
+      // Zoom-in approach when near goal
+      const dist = Math.abs((player.x + player.w / 2) - (p.x + p.w / 2));
+      if (dist < 150 && !goalZooming) {
+        goalZooming = true;
+        goalZoomTimer = 0;
+        goalTarget = p;
+      }
+      if (overlap(player, p) && !goalZooming) { nextLevel(); return; }
       continue;
     }
     const collideY = p.type === "float" ? p.y - 18 : p.y;
@@ -476,6 +485,19 @@ function update() {
   // Particles
   particles = particles.filter(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.life--; return p.life > 0; });
 
+  // Goal zoom-in sequence
+  if (goalZooming) {
+    goalZoomTimer++;
+    player.vx = 0;
+    goalZoomScale = Math.min(1.5, 1 + goalZoomTimer * 0.005);
+    if (goalZoomTimer > 90) {
+      goalZooming = false;
+      goalZoomScale = 1;
+      nextLevel();
+      return;
+    }
+  }
+
   // HUD
   $score.textContent = "Score: " + score;
   $lives.textContent = "❤️".repeat(lives);
@@ -530,6 +552,7 @@ function nextLevel() {
 function advanceLevel() {
   level++;
   player.x = 50; player.y = H - 120; player.vx = 0; player.vy = 0; cameraX = 0;
+  goalZooming = false; goalZoomTimer = 0; goalZoomScale = 1; goalTarget = null;
   generateLevel(level);
   burst(player.x, player.y, "#2ecc71", 15);
   gameState = "playing";
@@ -783,7 +806,16 @@ function draw() {
   }
 
   ctx.save();
-  ctx.translate(-cameraX, 0);
+  if (goalZooming && goalTarget) {
+    // Zoom toward the goal and player midpoint
+    const focusX = (player.x + goalTarget.x) / 2;
+    const focusY = (player.y + goalTarget.y) / 2;
+    ctx.translate(W / 2, H / 2);
+    ctx.scale(goalZoomScale, goalZoomScale);
+    ctx.translate(-focusX, -focusY);
+  } else {
+    ctx.translate(-cameraX, 0);
+  }
 
   // Platforms
   const ts = TILE_SIZE;
