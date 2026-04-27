@@ -158,86 +158,15 @@ document.getElementById("back-btn").addEventListener("click", () => showScreen("
 const MAX_STEP = 120; // max height difference between platforms (with margin)
 const MAX_GAP = 180;  // max pitfall width player can jump across
 
-// ── Hand-designed Level 1 ──
-function generateLevel1() {
-  const groundY = H - 40;
-  platforms = []; hazards = []; powerups = []; coins = []; questionTriggers = []; fallingBoxes = []; railings = [];
-
-  // Continuous ground with a few gaps
-  const groundSegs = [
-    [0, 500], [500, 200], // gap at 700-850
-    [850, 300], [1150, 200], // gap at 1350-1500
-    [1500, 400], [1900, 300], // gap at 2200-2350
-    [2350, 500],
-  ];
-  for (const [x, w] of groundSegs) {
-    platforms.push({ x, y: groundY, w, h: 40, type: "ground" });
-  }
-
-  // Raised platforms (using raisedPlat3, raisedPlat4, raisedPlatDouble)
-  // These are visual + collision. "sprite" field tells draw which image to use.
-  const raisedPlatforms = [
-    { x: 350, y: groundY - 100, w: 98, h: 16, type: "float", raisedSprite: "raisedPlat3" },
-    { x: 600, y: groundY - 80, w: 98, h: 16, type: "float", raisedSprite: "raisedPlat4" },
-    { x: 950, y: groundY - 110, w: 164, h: 16, type: "float", raisedSprite: "raisedPlatDouble" },
-    { x: 1250, y: groundY - 90, w: 98, h: 16, type: "float", raisedSprite: "raisedPlat3" },
-    { x: 1600, y: groundY - 100, w: 98, h: 16, type: "float", raisedSprite: "raisedPlat4" },
-    { x: 1850, y: groundY - 80, w: 164, h: 16, type: "float", raisedSprite: "raisedPlatDouble" },
-    { x: 2150, y: groundY - 110, w: 98, h: 16, type: "float", raisedSprite: "raisedPlat3" },
-    { x: 2500, y: groundY - 90, w: 98, h: 16, type: "float", raisedSprite: "raisedPlat4" },
-  ];
-  for (const rp of raisedPlatforms) platforms.push(rp);
-
-  // Coins — on platforms and ground
-  const coinPositions = [
-    [380, groundY - 140], [420, groundY - 140],
-    [630, groundY - 120], [670, groundY - 120],
-    [980, groundY - 150], [1020, groundY - 150], [1060, groundY - 150],
-    [1280, groundY - 130],
-    [1630, groundY - 140], [1670, groundY - 140],
-    [1880, groundY - 120], [1920, groundY - 120], [1960, groundY - 120],
-    [2180, groundY - 150],
-    [2530, groundY - 130], [2570, groundY - 130],
-    // Ground coins
-    [150, groundY - 25], [200, groundY - 25], [250, groundY - 25],
-    [1550, groundY - 25], [1600, groundY - 25],
-    [2400, groundY - 25], [2450, groundY - 25],
-  ];
-  for (const [x, y] of coinPositions) {
-    coins.push({ x, y, w: 22, h: 22, collected: false });
-  }
-
-  // Hazards — fire and chemical on ground
-  hazards.push({ x: 450, y: groundY - 42, w: 40, h: 40, type: HAZARD_TYPES[3], timer: 0, facing: 1 }); // Fire
-  hazards.push({ x: 1100, y: groundY - 42, w: 40, h: 40, type: HAZARD_TYPES[2], timer: 0, facing: 1 }); // Chemical
-  hazards.push({ x: 1700, y: groundY - 42, w: 40, h: 40, type: HAZARD_TYPES[0], timer: 0, facing: 1 }); // Wet Floor
-  hazards.push({ x: 2000, y: groundY - 42, w: 40, h: 40, type: HAZARD_TYPES[3], timer: 0, facing: 1 }); // Fire
-  hazards.push({ x: 2600, y: groundY - 42, w: 40, h: 40, type: HAZARD_TYPES[1], timer: 0, facing: 1 }); // Electrical
-
-  // Railings
-  railings.push({ x: 100, y: groundY, count: 2 });
-  railings.push({ x: 900, y: groundY, count: 1 });
-  railings.push({ x: 1550, y: groundY, count: 2 });
-  railings.push({ x: 2400, y: groundY, count: 1 });
-
-  // Power-ups
-  powerups.push({ x: 300, y: groundY - 70, w: 36, h: 36, type: POWERUP_TYPES[0], collected: false, bob: 0 }); // Hard Hat
-  powerups.push({ x: 1400, y: groundY - 70, w: 36, h: 36, type: POWERUP_TYPES[1], collected: false, bob: 1 }); // Safety Boots
-  powerups.push({ x: 2300, y: groundY - 70, w: 36, h: 36, type: POWERUP_TYPES[2], collected: false, bob: 2 }); // First Aid
-
-  // Question triggers
-  questionTriggers.push({ x: 800, y: groundY - 50, w: 46, h: 46, used: false });
-  questionTriggers.push({ x: 1800, y: groundY - 50, w: 46, h: 46, used: false });
-
-  // Goal — Safety JD
-  platforms.push({ x: 2750, y: groundY, w: 200, h: 40, type: "ground" });
-  platforms.push({ x: 2800, y: groundY - 60, w: 60, h: 60, type: "goal" });
+// ── Seeded Random ──
+let seed = 1;
+function seededRandom() {
+  seed = (seed * 16807 + 0) % 2147483647;
+  return (seed - 1) / 2147483646;
 }
 
 function generateLevel(lvl) {
-  if (lvl === 1) { generateLevel1(); return; }
-
-  // Procedural levels for 2+
+  seed = lvl * 7919; // deterministic seed per level
   platforms = []; hazards = []; powerups = []; coins = []; questionTriggers = []; fallingBoxes = []; railings = [];
   const groundY = H - 40;
   const levelWidth = 3000 + lvl * 1000;
@@ -247,7 +176,7 @@ function generateLevel(lvl) {
   // Ground segments — gaps limited to jumpable width
   let lastGroundEnd = 0;
   for (let x = 0; x < levelWidth; x += 200) {
-    if (x < 400 || Math.random() > 0.15) {
+    if (x < 400 || seededRandom() > 0.15) {
       // Check if gap since last ground is too wide
       if (x - lastGroundEnd > MAX_GAP) {
         // Fill in ground to keep gap jumpable
@@ -270,23 +199,23 @@ function generateLevel(lvl) {
 
   // Floating platforms — all reachable from ground with a single jump
   let lastY = groundY;
-  for (let x = 300; x < goalX - 150; x += 120 + Math.random() * 160) {
-    const w = 80 + Math.random() * 80;
+  for (let x = 300; x < goalX - 150; x += 120 + seededRandom() * 160) {
+    const w = 80 + seededRandom() * 80;
     if (!hasGround(x) || !hasGround(x + w - 30)) { continue; }
-    const dir = Math.random() < 0.6 ? -1 : 1;
-    let y = lastY + dir * (40 + Math.random() * (MAX_STEP - 40));
+    const dir = seededRandom() < 0.6 ? -1 : 1;
+    let y = lastY + dir * (40 + seededRandom() * (MAX_STEP - 40));
     // Clamp: must be reachable from ground in one jump, and from previous platform
     y = Math.max(groundY - MAX_STEP, Math.min(groundY - 60, y));
     if (lastY - y > MAX_STEP) y = lastY - MAX_STEP;
     platforms.push({ x, y, w, h: 16, type: "float" });
-    if (Math.random() > 0.4) {
+    if (seededRandom() > 0.4) {
       coins.push({ x: x + w / 2 - 8, y: y - 43, w: 22, h: 22, collected: false });
-    } else if (Math.random() < 0.3) {
-      const ht = HAZARD_TYPES[Math.floor(Math.random() * HAZARD_TYPES.length)];
-      hazards.push({ x: x + w / 2 - 20, y: y - 50, w: 40, h: 40, type: ht, timer: Math.random() * 6 });
+    } else if (seededRandom() < 0.3) {
+      const ht = HAZARD_TYPES[Math.floor(seededRandom() * HAZARD_TYPES.length)];
+      hazards.push({ x: x + w / 2 - 20, y: y - 50, w: 40, h: 40, type: ht, timer: seededRandom() * 6 });
     }
     lastY = y;
-    if (Math.random() < 0.3) lastY = groundY;
+    if (seededRandom() < 0.3) lastY = groundY;
   }
 
   // Helper: check if position overlaps any placed object
@@ -299,22 +228,22 @@ function generateLevel(lvl) {
 
   // Railings — spawn first so hazards avoid them
   railings = [];
-  for (let x = 300; x < goalX - 200; x += 300 + Math.random() * 400) {
+  for (let x = 300; x < goalX - 200; x += 300 + seededRandom() * 400) {
     if (!hasGround(x) || tooClose(x)) continue;
-    const count = 1 + Math.floor(Math.random() * 3);
+    const count = 1 + Math.floor(seededRandom() * 3);
     railings.push({ x, y: groundY, count });
     placeAt(x);
   }
 
   // Hazards on ground
-  for (let x = 500; x < goalX - 100; x += 200 + Math.random() * 300) {
+  for (let x = 500; x < goalX - 100; x += 200 + seededRandom() * 300) {
     if (!hasGround(x) || tooClose(x)) continue;
-    const ht = HAZARD_TYPES[Math.floor(Math.random() * HAZARD_TYPES.length)];
-    const h = { x, y: groundY - 42, w: 40, h: 40, type: ht, timer: Math.random() * 6, facing: 1 };
+    const ht = HAZARD_TYPES[Math.floor(seededRandom() * HAZARD_TYPES.length)];
+    const h = { x, y: groundY - 42, w: 40, h: 40, type: ht, timer: seededRandom() * 6, facing: 1 };
     if (ht.patrols) {
       h.originX = x;
-      h.patrolRange = 60 + Math.random() * 60;
-      h.patrolSpeed = 0.5 + Math.random() * 0.5;
+      h.patrolRange = 60 + seededRandom() * 60;
+      h.patrolSpeed = 0.5 + seededRandom() * 0.5;
     }
     hazards.push(h);
     placeAt(x);
@@ -322,21 +251,21 @@ function generateLevel(lvl) {
 
   // Power-ups — only on solid ground or above floating platforms, not over pitfalls
   const floats = platforms.filter(p => p.type === "float");
-  for (let x = 400; x < goalX - 100; x += 400 + Math.random() * 400) {
+  for (let x = 400; x < goalX - 100; x += 400 + seededRandom() * 400) {
     if (tooClose(x)) continue;
     // Must have ground or a nearby float platform
     const nearFloat = floats.find(f => Math.abs(f.x + f.w / 2 - x) < 80);
     if (!hasGround(x) && !nearFloat) continue;
-    const pt = POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
+    const pt = POWERUP_TYPES[Math.floor(seededRandom() * POWERUP_TYPES.length)];
     let anchorY = groundY;
     if (nearFloat) anchorY = nearFloat.y;
-    const py = anchorY - 30 - Math.random() * 40;
-    powerups.push({ x, y: Math.max(40, py), w: 36, h: 36, type: pt, collected: false, bob: Math.random() * Math.PI * 2 });
+    const py = anchorY - 30 - seededRandom() * 40;
+    powerups.push({ x, y: Math.max(40, py), w: 36, h: 36, type: pt, collected: false, bob: seededRandom() * Math.PI * 2 });
     placeAt(x);
   }
 
   // Question triggers
-  for (let x = 600; x < goalX - 100; x += 500 + Math.random() * 400) {
+  for (let x = 600; x < goalX - 100; x += 500 + seededRandom() * 400) {
     if (!hasGround(x) || tooClose(x)) continue;
     questionTriggers.push({ x, y: groundY - 50, w: 46, h: 46, used: false });
     placeAt(x);
