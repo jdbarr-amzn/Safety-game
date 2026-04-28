@@ -105,6 +105,28 @@ OBJ_NAMES.forEach(loadObj);
 const bgFarImg = new Image();
 bgFarImg.src = "sprites/Backgrounds/bg-far.png";
 
+// ── Sound ──
+const SFX = {};
+function loadSound(name, src, vol) {
+  const a = new Audio(src);
+  a.volume = vol || 0.5;
+  SFX[name] = a;
+}
+function playSound(name) {
+  const s = SFX[name];
+  if (!s) return;
+  s.currentTime = 0;
+  s.play().catch(() => {});
+}
+loadSound("coin", "sounds/Coin.wav", 0.4);
+loadSound("hit", "sounds/Hit.ogg", 0.6);
+loadSound("powerup", "sounds/Power up.wav", 0.5);
+loadSound("correct", "sounds/correct.wav", 0.5);
+loadSound("wrong", "sounds/wrong.mp3", 0.5);
+loadSound("crash", "sounds/crash.wav", 0.4);
+loadSound("levelcomplete", "sounds/Level complete.wav", 0.6);
+loadSound("gameover", "sounds/game over.wav", 0.6);
+
 // ── State ──
 let gameState = "menu";
 let player, platforms, hazards, powerups, coins, particles, questionTriggers, fallingBoxes, railings;
@@ -390,6 +412,7 @@ function update() {
     if (!c.collected && overlap(player, c)) {
       c.collected = true; score += 10;
       burst(c.x, c.y, "#f1c40f", 5);
+      playSound("coin");
     }
   }
 
@@ -400,6 +423,7 @@ function update() {
       p.collected = true;
       applyPowerup(p.type);
       burst(p.x, p.y, p.type.color, 8);
+      playSound("powerup");
     }
   }
 
@@ -419,7 +443,8 @@ function update() {
         burst(h.x, h.y, h.type.color, 6);
         hazards.splice(i, 1);
         score += 25;
-      } else { loseLife(); return; }
+        playSound("hit");
+      } else { playSound("hit"); loseLife(); return; }
     }
   }
 
@@ -463,7 +488,8 @@ function update() {
         player.shielded = false;
         burst(b.x, b.y, "#e67e22", 6);
         score += 25;
-      } else { loseLife(); return; }
+        playSound("crash");
+      } else { playSound("hit"); loseLife(); return; }
     }
     // Land on platform — stop and become static debris briefly then vanish
     for (const p of platforms) {
@@ -471,6 +497,7 @@ function update() {
       if (b.vy > 0 && b.x + b.w > p.x && b.x < p.x + p.w &&
           b.y + b.h >= p.y && b.y + b.h <= p.y + 10 + b.vy) {
         burst(b.x, b.y, "#e67e22", 4);
+        playSound("crash");
         fallingBoxes.splice(i, 1);
         break;
       }
@@ -534,6 +561,7 @@ let cinematicSlideX = W; // starts off-screen right
 
 function nextLevel() {
   score += 100;
+  playSound("levelcomplete");
   // Show cinematic for levels 1-3
   if (level <= 3) {
     gameState = "cinematic";
@@ -623,6 +651,7 @@ function drawCinematic() {
 }
 
 function gameOver() {
+  playSound("gameover");
   document.getElementById("final-score").textContent = playerName + " scored " + score + " points on Level " + level + "!";
   saveScore(playerName, score);
   showScreen("gameover");
@@ -661,10 +690,12 @@ function answerQuestion(idx, btn) {
     btn.classList.add("correct");
     score += 50;
     burst(player.x, player.y, "#2ecc71", 10);
+    playSound("correct");
   } else {
     btn.classList.add("wrong");
     buttons[currentQuestion.c].classList.add("correct");
     score = Math.max(0, score - 10);
+    playSound("wrong");
   }
   setTimeout(() => showScreen("playing"), 1200);
 }
