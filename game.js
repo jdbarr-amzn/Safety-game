@@ -101,6 +101,10 @@ function loadObj(name) {
 Object.entries(TILE_NAMES).forEach(([k, v]) => loadTile(k, v));
 OBJ_NAMES.forEach(loadObj);
 
+// Background image
+const bgFarImg = new Image();
+bgFarImg.src = "sprites/Backgrounds/bg-far.png";
+
 // ── State ──
 let gameState = "menu";
 let player, platforms, hazards, powerups, coins, particles, questionTriggers, fallingBoxes, railings;
@@ -736,7 +740,14 @@ function drawCachedBackground() {
 }
 
 function draw() {
-  drawCachedBackground();
+  // Furthest background — tiled parallax image
+  if (bgFarImg.complete && bgFarImg.naturalWidth) {
+    const scrollX = -(cameraX * 0.1) % W;
+    ctx.drawImage(bgFarImg, scrollX, 0, W, H);
+    ctx.drawImage(bgFarImg, scrollX + W, 0, W, H);
+  } else {
+    drawCachedBackground();
+  }
 
   // Back wall — far racking (slow parallax)
   for (let i = 0; i < 12; i++) {
