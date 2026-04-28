@@ -282,9 +282,9 @@ function generateLevel(lvl) {
     placeAt(x);
   }
 
-  // Hazards on ground
+  // Hazards on ground — also check not near pitfall edges
   for (let x = 500; x < goalX - 100; x += 200 + seededRandom() * 300) {
-    if (!hasGround(x) || tooClose(x)) continue;
+    if (!hasGround(x) || !hasGround(x + 60) || tooClose(x)) continue;
     const ht = HAZARD_TYPES[Math.floor(seededRandom() * HAZARD_TYPES.length)];
     const h = { x, y: groundY - 42, w: 40, h: 40, type: ht, timer: seededRandom() * 6, facing: 1 };
     if (ht.patrols) {
