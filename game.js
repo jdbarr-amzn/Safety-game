@@ -126,6 +126,7 @@ loadSound("wrong", "sounds/wrong.mp3", 0.5);
 loadSound("crash", "sounds/crash.wav", 0.4);
 loadSound("levelcomplete", "sounds/Level complete.wav", 0.6);
 loadSound("gameover", "sounds/game over.wav", 0.6);
+loadSound("jump", "sounds/Jump.wav", 0.4);
 
 // Background music
 const bgMusic = new Audio("sounds/music.mp3");
@@ -362,9 +363,11 @@ function update() {
       player.vy = -11.9;
       player.onGround = false;
       player.canDoubleJump = !!activeEffects.doublejump;
+      playSound("jump");
     } else if (player.canDoubleJump) {
       player.vy = -10;
       player.canDoubleJump = false;
+      playSound("jump");
     }
   }
   player.jumpHeld = jumpPressed;
