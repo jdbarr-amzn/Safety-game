@@ -813,13 +813,12 @@ function draw() {
 
   ctx.save();
   if (goalZooming && goalTarget) {
-    // Focus on goal, keep floor visible at bottom
-    const focusX = goalTarget.x + goalTarget.w / 2;
-    const groundY = H - 40;
-    const visibleBottom = groundY + 40; // include full floor
-    ctx.translate(W / 2, H / goalZoomScale);
+    // Zoom centered on player's feet — ground always visible
+    const focusX = player.x + player.w / 2;
+    const focusY = H - 40; // ground level
+    ctx.translate(focusX - focusX * goalZoomScale, focusY - focusY * goalZoomScale);
     ctx.scale(goalZoomScale, goalZoomScale);
-    ctx.translate(-focusX + 60, -visibleBottom + H / goalZoomScale);
+    ctx.translate(-cameraX, 0);
   } else {
     ctx.translate(-cameraX, 0);
   }
