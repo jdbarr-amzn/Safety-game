@@ -127,6 +127,11 @@ loadSound("crash", "sounds/crash.wav", 0.4);
 loadSound("levelcomplete", "sounds/Level complete.wav", 0.6);
 loadSound("gameover", "sounds/game over.wav", 0.6);
 
+// Background music
+const bgMusic = new Audio("sounds/music.mp3");
+bgMusic.loop = true;
+bgMusic.volume = 0.3;
+
 // ── State ──
 let gameState = "menu";
 let player, platforms, hazards, powerups, coins, particles, questionTriggers, fallingBoxes, railings;
@@ -330,6 +335,8 @@ function startGame() {
   goalZooming = false; goalZoomTimer = 0; goalZoomScale = 1; goalTarget = null; goalZoomCamX = 0;
   generateLevel(level);
   showScreen("playing");
+  bgMusic.currentTime = 0;
+  bgMusic.play().catch(() => {});
 }
 
 // ── Collision ──
@@ -488,7 +495,7 @@ function update() {
         player.shielded = false;
         burst(b.x, b.y, "#e67e22", 6);
         score += 25;
-        playSound("crash");
+        playSound("hit");
       } else { playSound("hit"); loseLife(); return; }
     }
     // Land on platform — stop and become static debris briefly then vanish
@@ -651,6 +658,7 @@ function drawCinematic() {
 }
 
 function gameOver() {
+  bgMusic.pause();
   playSound("gameover");
   document.getElementById("final-score").textContent = playerName + " scored " + score + " points on Level " + level + "!";
   saveScore(playerName, score);
