@@ -202,6 +202,14 @@ function generateLevel(lvl) {
     return grounds.some(p => x >= p.x && x + 30 <= p.x + p.w);
   }
 
+  // Helper: check if position overlaps any placed object
+  const placedObjects = [];
+  const MIN_SPACING = 100;
+  function tooClose(x) {
+    return placedObjects.some(px => Math.abs(px - x) < MIN_SPACING);
+  }
+  function placeAt(x) { placedObjects.push(x); }
+
   // Floating platforms — all reachable from ground with a single jump
   let lastY = groundY;
   for (let x = 300; x < goalX - 150; x += 120 + seededRandom() * 160) {
@@ -209,27 +217,19 @@ function generateLevel(lvl) {
     if (!hasGround(x) || !hasGround(x + w - 30)) { continue; }
     const dir = seededRandom() < 0.6 ? -1 : 1;
     let y = lastY + dir * (40 + seededRandom() * (MAX_STEP - 40));
-    // Clamp: must be reachable from ground in one jump, and from previous platform
     y = Math.max(groundY - MAX_STEP, Math.min(groundY - 60, y));
     if (lastY - y > MAX_STEP) y = lastY - MAX_STEP;
     platforms.push({ x, y, w, h: 16, type: "float" });
     if (seededRandom() > 0.4) {
       coins.push({ x: x + w / 2 - 8, y: y - 43, w: 22, h: 22, collected: false });
-    } else if (seededRandom() < 0.3) {
+    } else if (seededRandom() < 0.3 && !tooClose(x + w / 2)) {
       const ht = HAZARD_TYPES[Math.floor(seededRandom() * HAZARD_TYPES.length)];
       hazards.push({ x: x + w / 2 - 20, y: y - 58, w: 40, h: 40, type: ht, timer: seededRandom() * 6 });
+      placeAt(x + w / 2);
     }
     lastY = y;
     if (seededRandom() < 0.3) lastY = groundY;
   }
-
-  // Helper: check if position overlaps any placed object
-  const placedObjects = [];
-  const MIN_SPACING = 80;
-  function tooClose(x) {
-    return placedObjects.some(px => Math.abs(px - x) < MIN_SPACING);
-  }
-  function placeAt(x) { placedObjects.push(x); }
 
   // Railings — spawn first so hazards avoid them
   railings = [];
