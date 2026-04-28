@@ -498,13 +498,23 @@ function update() {
         playSound("hit");
       } else { playSound("hit"); loseLife(); return; }
     }
+    // Early crash sound when box is close to landing
+    if (!b.crashPlayed && b.vy > 0) {
+      for (const p of platforms) {
+        if (p.type === "goal") continue;
+        if (b.x + b.w > p.x && b.x < p.x + p.w && b.y + b.h >= p.y - 30 && b.y + b.h < p.y) {
+          playSound("crash");
+          b.crashPlayed = true;
+          break;
+        }
+      }
+    }
     // Land on platform — stop and become static debris briefly then vanish
     for (const p of platforms) {
       if (p.type === "goal") continue;
       if (b.vy > 0 && b.x + b.w > p.x && b.x < p.x + p.w &&
           b.y + b.h >= p.y && b.y + b.h <= p.y + 10 + b.vy) {
         burst(b.x, b.y, "#e67e22", 4);
-        playSound("crash");
         fallingBoxes.splice(i, 1);
         break;
       }
