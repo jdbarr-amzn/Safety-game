@@ -111,7 +111,7 @@ let player, platforms, hazards, powerups, coins, particles, questionTriggers, fa
 let score, lives, level, cameraX, playerName, activeEffects, usedQuestions;
 let currentQuestion = null;
 let lastBoxSpawn = 0;
-let goalZooming = false, goalZoomTimer = 0, goalZoomScale = 1, goalTarget = null;
+let goalZooming = false, goalZoomTimer = 0, goalZoomScale = 1, goalTarget = null, goalZoomCamX = 0;
 const keys = {};
 
 // ── UI ──
@@ -309,7 +309,7 @@ function startGame() {
   activeEffects = {}; usedQuestions = new Set(); particles = [];
   player = { x: 50, y: H - 120, w: 40, h: 72, vx: 0, vy: 0, onGround: false, facing: 1, shielded: false, frame: 0 };
   lastBoxSpawn = 0;
-  goalZooming = false; goalZoomTimer = 0; goalZoomScale = 1; goalTarget = null;
+  goalZooming = false; goalZoomTimer = 0; goalZoomScale = 1; goalTarget = null; goalZoomCamX = 0;
   generateLevel(level);
   showScreen("playing");
 }
@@ -551,7 +551,7 @@ function nextLevel() {
 function advanceLevel() {
   level++;
   player.x = 50; player.y = H - 120; player.vx = 0; player.vy = 0; cameraX = 0;
-  goalZooming = false; goalZoomTimer = 0; goalZoomScale = 1; goalTarget = null;
+  goalZooming = false; goalZoomTimer = 0; goalZoomScale = 1; goalTarget = null; goalZoomCamX = 0;
   generateLevel(level);
   burst(player.x, player.y, "#2ecc71", 15);
   gameState = "playing";
@@ -813,12 +813,14 @@ function draw() {
 
   ctx.save();
   if (goalZooming && goalTarget) {
-    // Zoom centered on player's feet — ground always visible
-    const focusX = player.x + player.w / 2;
-    const focusY = H - 40; // ground level
-    ctx.translate(focusX - focusX * goalZoomScale, focusY - focusY * goalZoomScale);
+    // Lock camera at zoom start, zoom from screen center anchored to ground
+    if (!goalZoomCamX) goalZoomCamX = cameraX;
+    const screenPlayerX = player.x - goalZoomCamX;
+    const anchorX = screenPlayerX + player.w / 2;
+    const anchorY = H - 40;
+    ctx.translate(anchorX * (1 - goalZoomScale), anchorY * (1 - goalZoomScale));
     ctx.scale(goalZoomScale, goalZoomScale);
-    ctx.translate(-cameraX, 0);
+    ctx.translate(-goalZoomCamX, 0);
   } else {
     ctx.translate(-cameraX, 0);
   }
