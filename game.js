@@ -813,12 +813,13 @@ function draw() {
 
   ctx.save();
   if (goalZooming && goalTarget) {
-    // Focus on goal, floor aligned with bottom of frame
+    // Focus on goal, keep floor visible at bottom
     const focusX = goalTarget.x + goalTarget.w / 2;
     const groundY = H - 40;
-    ctx.translate(W / 2, H);
+    const visibleBottom = groundY + 40; // include full floor
+    ctx.translate(W / 2, H / goalZoomScale);
     ctx.scale(goalZoomScale, goalZoomScale);
-    ctx.translate(-focusX + 60, -groundY);
+    ctx.translate(-focusX + 60, -visibleBottom + H / goalZoomScale);
   } else {
     ctx.translate(-cameraX, 0);
   }
