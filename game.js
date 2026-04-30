@@ -49,7 +49,7 @@ const SPRITE_DEFS = {
   "player-jump":   { src: "sprites/player-jump.png",   cols: 5, rows: 5, fw: 324, fh: 610, frames: 25 },
   "player-shield": { src: "sprites/player-shield.png", cols: 5, rows: 5, fw: 252, fh: 520, frames: 25 },
   "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1, drawH: 140, offsetY: 67 },
-  "hazard-fire": { src: "sprites/hazard-fire.png", cols: 5, rows: 5, fw: 339, fh: 404, frames: 25, drawH: 90, offsetY: 5, noFlip: true },
+  "hazard-fire": { src: "sprites/Fire Hazard.png", cols: 8, rows: 1, fw: 32, fh: 48, frames: 8, drawH: 58, offsetY: 5, noFlip: true },
   "hazard-electrical": { src: "sprites/hazard-electrical.png", cols: 3, rows: 3, fw: 120, fh: 120, frames: 9, drawH: 90, offsetY: 5, noFlip: true },
   "hazard-chemical": { src: "sprites/hazard-chemical.png", cols: 1, rows: 1, fw: 791, fh: 791, frames: 1, drawH: 110, offsetY: 58, noFlip: true },
   "manager": { src: "sprites/manager.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1 },
@@ -101,9 +101,43 @@ function loadObj(name) {
 Object.entries(TILE_NAMES).forEach(([k, v]) => loadTile(k, v));
 OBJ_NAMES.forEach(loadObj);
 
-// Background image
-const bgFarImg = new Image();
-bgFarImg.src = "sprites/Backgrounds/bg-far.png";
+// Background images
+const bgWallImg = new Image();
+bgWallImg.src = "backgrounds/Warehouse wall B-1.png (1).png";
+const bgRackImg = new Image();
+bgRackImg.src = "sprites/Racking A-1.png.png";
+
+// Guru sprites
+const guruImg = new Image();
+guruImg.src = "sprites/Guru.png";
+const guruShopImg = new Image();
+guruShopImg.src = "sprites/Guru Shop.png";
+
+// Money sprite (animated, 6 frames, 24x24 each)
+const moneyImg = new Image();
+moneyImg.src = "sprites/Objects/Money.png";
+
+// Drone sprites
+const droneWithBoxImg = new Image();
+droneWithBoxImg.src = "sprites/Objects/Forward with box.png";
+const droneEmptyImg = new Image();
+droneEmptyImg.src = "sprites/Objects/Forward empty.png";
+const amazonBoxImg = new Image();
+amazonBoxImg.src = "sprites/Objects/Amazon Box.png";
+
+// Box stack parallax sprites
+const boxStack1 = new Image();
+boxStack1.src = "sprites/Objects/Boxes-removebg-preview.png";
+const boxStack2 = new Image();
+boxStack2.src = "sprites/Objects/Boxes_2-removebg-preview.png";
+
+// Closest background layer
+const boxBG2 = new Image();
+boxBG2.src = "sprites/Objects/Box BG2.png";
+
+// HUD frame
+const uiFrameImg = new Image();
+uiFrameImg.src = "sprites/UI Frame A.png";
 
 // ── Sound ──
 const SFX = {};
@@ -133,17 +167,49 @@ const bgMusic = new Audio("sounds/music.mp3");
 bgMusic.loop = true;
 bgMusic.volume = 0.3;
 
+// Menu music
+const menuMusic = new Audio("Title screen/backgroundmusicmaster-gamer-menu-431351.mp3");
+menuMusic.loop = true;
+menuMusic.volume = 0.3;
+
+// Start menu music on first user interaction (browser requires this)
+document.getElementById("lets-play-btn").addEventListener("click", () => {
+  document.getElementById("splash-screen").classList.add("hidden");
+  screens.menu.classList.remove("hidden");
+  gameState = "menu";
+  menuMusic.play().catch(() => {});
+});
+
 // ── State ──
 let gameState = "menu";
 let player, platforms, hazards, powerups, coins, particles, questionTriggers, fallingBoxes, railings;
 let score, lives, level, cameraX, playerName, activeEffects, usedQuestions;
+let eswag = 0; // E-Swag Bucks currency (from collecting money pickups)
 let currentQuestion = null;
 let lastBoxSpawn = 0;
+let lastDroneSpawn = 0;
+let drones = []; // { x, y, targetX, state: "carrying"|"warning"|"dropping"|"leaving", warning, box: {x,y,vy} }
 let goalZooming = false, goalZoomTimer = 0, goalZoomScale = 1, goalTarget = null, goalZoomCamX = 0;
+
+// ── Shop State ──
+let guruNPC = null; // { x, y, w, h } placed in level
+let shopOpen = false;
+let shopSlideX = -400; // guru shop sprite slides in from left
+let shopSelection = 0;
+let shopVisitedThisLevel = false;
+const SHOP_UPGRADES = [
+  { name: "Steel Boots",   desc: "Permanent double jump",    cost: 150, effect: "permDoubleJump", icon: "🥾" },
+  { name: "Hard Hat+",     desc: "Start each level shielded", cost: 200, effect: "permShield",     icon: "⛑️" },
+  { name: "Magnet Gloves", desc: "Wider coin pickup range",   cost: 100, effect: "permMagnet",     icon: "🧲" },
+  { name: "Extra Life",    desc: "+1 life",                   cost: 120, effect: "extraLife",       icon: "❤️" },
+  { name: "Safety Vest+",  desc: "2× coin value",             cost: 250, effect: "permDoubleCoins", icon: "🦺" },
+];
+let purchasedUpgrades = {}; // { effect: true }
 const keys = {};
 
 // ── UI ──
 const screens = {
+  splash: document.getElementById("splash-screen"),
   menu: document.getElementById("menu-screen"),
   question: document.getElementById("question-screen"),
   gameover: document.getElementById("gameover-screen"),
@@ -164,6 +230,12 @@ function showScreen(name) {
   } else {
     $hud.classList.add("hidden");
   }
+  // Menu music
+  if (name === "menu" || name === "leaderboard") {
+    menuMusic.play().catch(() => {});
+  } else {
+    menuMusic.pause();
+  }
   // Show the requested overlay
   if (screens[name]) {
     screens[name].classList.remove("hidden");
@@ -176,6 +248,12 @@ document.addEventListener("keydown", e => {
   keys[e.code] = true;
   if (["Space", "ArrowUp", "ArrowDown"].includes(e.code)) e.preventDefault();
   if (gameState === "cinematic" && cinematicTimer > 30) advanceLevel();
+  if (gameState === "shop") {
+    if (e.code === "ArrowUp") shopSelection = (shopSelection - 1 + SHOP_UPGRADES.length) % SHOP_UPGRADES.length;
+    if (e.code === "ArrowDown") shopSelection = (shopSelection + 1) % SHOP_UPGRADES.length;
+    if (e.code === "Enter" || e.code === "Space") purchaseUpgrade();
+    if (e.code === "Escape") { gameState = "playing"; Object.keys(keys).forEach(k => keys[k] = false); }
+  }
 });
 document.addEventListener("keyup", e => keys[e.code] = false);
 
@@ -200,7 +278,7 @@ function seededRandom() {
 
 function generateLevel(lvl) {
   seed = lvl * 7919; // deterministic seed per level
-  platforms = []; hazards = []; powerups = []; coins = []; questionTriggers = []; fallingBoxes = []; railings = [];
+  platforms = []; hazards = []; powerups = []; coins = []; questionTriggers = []; fallingBoxes = []; railings = []; drones = [];
   const groundY = H - 40;
   const levelWidth = 3000 + lvl * 1000;
 
@@ -263,7 +341,7 @@ function generateLevel(lvl) {
     if (lastY - y > MAX_STEP) y = lastY - MAX_STEP;
     platforms.push({ x, y, w, h: 16, type: "float" });
     if (seededRandom() > 0.4) {
-      coins.push({ x: x + w / 2 - 8, y: y - 43, w: 22, h: 22, collected: false });
+      coins.push({ x: x + w / 2 - 8, y: y - 43, w: 22, h: 22, collected: false, bob: 0 });
     } else if (seededRandom() < 0.3 && !tooClose(x + w / 2)) {
       const ht = HAZARD_TYPES[Math.floor(seededRandom() * HAZARD_TYPES.length)];
       hazards.push({ x: x + w / 2 - 20, y: y - 58, w: 40, h: 40, type: ht, timer: seededRandom() * 6 });
@@ -323,20 +401,30 @@ function generateLevel(lvl) {
     platforms.push({ x: goalX - 50, y: groundY, w: 200, h: 40, type: "ground" });
   }
   platforms.push({ x: goalX, y: groundY - 60, w: 60, h: 60, type: "goal" });
+
+  // Guru NPC at start of level 4+
+  guruNPC = null;
+  shopVisitedThisLevel = false;
+  if (lvl >= 4 && (lvl - 4) % 3 === 0) {
+    guruNPC = { x: 180, y: groundY - 80, w: 50, h: 80 };
+  }
 }
 
 // ── Start Game ──
 function startGame() {
   bgCanvas = null; // reset cached background
   playerName = document.getElementById("player-name").value.trim() || "Player";
-  score = 0; lives = 3; level = 1; cameraX = 0;
+  score = 0; lives = 3; level = 1; cameraX = 0; eswag = 0;
   activeEffects = {}; usedQuestions = new Set(); particles = [];
+  purchasedUpgrades = {};
   player = { x: 50, y: H - 120, w: 40, h: 72, vx: 0, vy: 0, onGround: false, facing: 1, shielded: false, frame: 0 };
   lastBoxSpawn = 0;
+  lastDroneSpawn = 0;
   goalZooming = false; goalZoomTimer = 0; goalZoomScale = 1; goalTarget = null; goalZoomCamX = 0;
   generateLevel(level);
   showScreen("playing");
   bgMusic.currentTime = 0;
+  menuMusic.pause(); menuMusic.currentTime = 0;
   bgMusic.play().catch(() => {});
 }
 
@@ -362,7 +450,7 @@ function update() {
     if (player.onGround) {
       player.vy = -11.9;
       player.onGround = false;
-      player.canDoubleJump = !!activeEffects.doublejump;
+      player.canDoubleJump = !!(activeEffects.doublejump || purchasedUpgrades.permDoubleJump);
       playSound("jump");
     } else if (player.canDoubleJump) {
       player.vy = -10;
@@ -418,9 +506,12 @@ function update() {
   }
 
   // Coin pickup
+  const magnetRange = purchasedUpgrades.permMagnet ? 60 : 0;
   for (const c of coins) {
-    if (!c.collected && overlap(player, c)) {
-      c.collected = true; score += 10;
+    if (c.collected) continue;
+    const inRange = magnetRange > 0 && Math.abs(player.x - c.x) < magnetRange && Math.abs(player.y - c.y) < magnetRange;
+    if (overlap(player, c) || inRange) {
+      c.collected = true; eswag += purchasedUpgrades.permDoubleCoins ? 20 : 10;
       burst(c.x, c.y, "#f1c40f", 5);
       playSound("coin");
     }
@@ -435,6 +526,16 @@ function update() {
       burst(p.x, p.y, p.type.color, 8);
       playSound("powerup");
     }
+  }
+
+  // Guru NPC — open shop on contact
+  if (guruNPC && !shopVisitedThisLevel && overlap(player, guruNPC)) {
+    shopOpen = true;
+    shopVisitedThisLevel = true;
+    shopSlideX = -400;
+    shopSelection = 0;
+    gameState = "shop";
+    return; // stop update while shop opens
   }
 
   // Hazard collision
@@ -466,16 +567,17 @@ function update() {
     }
   }
 
-  // Falling boxes — spawn rate increases with level
-  const spawnInterval = Math.max(400, 2000 - level * 200);
-  if (now - lastBoxSpawn > spawnInterval) {
-    lastBoxSpawn = now;
-    const bx = player.x - 100 + Math.random() * (W + 200);
-    const speed = 1.5 + Math.random() * 1.5 + level * 0.3;
-    // Spawn warning indicator first, box drops after warning
-    const boxSprites = ["Box1", "Box3", "Box4"];
-    const boxSpr = boxSprites[Math.floor(Math.random() * boxSprites.length)];
-    fallingBoxes.push({ x: bx, y: -30, w: 34, h: 34, vy: 0, dropSpeed: speed, warning: 60, sprite: boxSpr });
+  // Falling boxes — spawn rate increases with level (levels 1-3 only)
+  if (level < 4) {
+    const spawnInterval = Math.max(400, 2000 - level * 200);
+    if (now - lastBoxSpawn > spawnInterval) {
+      lastBoxSpawn = now;
+      const bx = player.x - 100 + Math.random() * (W + 200);
+      const speed = 1.5 + Math.random() * 1.5 + level * 0.3;
+      const boxSprites = ["Box1", "Box3", "Box4"];
+      const boxSpr = boxSprites[Math.floor(Math.random() * boxSprites.length)];
+      fallingBoxes.push({ x: bx, y: 40, w: 34, h: 34, vy: 0, dropSpeed: speed, warning: 60, sprite: boxSpr });
+    }
   }
 
   // Update falling boxes
@@ -524,6 +626,96 @@ function update() {
     }
   }
 
+  // Drone hazard — level 4+
+  if (level >= 4) {
+    const droneInterval = Math.max(500, 2500 - level * 150);
+    if (now - lastDroneSpawn > droneInterval) {
+      lastDroneSpawn = now;
+      const targetX = player.x + player.w / 2 + player.vx * 40; // predict ahead based on velocity
+      drones.push({
+        x: cameraX + W + 60, y: 50 + Math.random() * 30,
+        targetX: targetX, state: "carrying", warning: 0,
+        animTimer: 0, droneSpeed: 4,
+        box: null
+      });
+    }
+
+    for (let i = drones.length - 1; i >= 0; i--) {
+      const d = drones[i];
+      d.animTimer += 0.15;
+
+      if (d.state === "carrying") {
+        // Continuously update target to lead the player
+        const playerMoving = Math.abs(player.vx) > 0.5;
+        d.targetX = player.x + player.w / 2 + player.vx * 30;
+        d.x -= d.droneSpeed;
+
+        if (d.x <= d.targetX + 20) {
+          if (playerMoving) {
+            // Player is moving — drop immediately without stopping
+            d.box = { x: d.x + 10, y: d.y + 40, w: 34, h: 22, vy: 1.5, vx: -d.droneSpeed * 0.5, crashPlayed: false };
+            d.state = "dropping";
+          } else {
+            // Player stopped — hover and warn
+            d.state = "warning";
+            d.warning = 45;
+          }
+        }
+      } else if (d.state === "warning") {
+        d.warning--;
+        if (d.warning <= 0) {
+          d.box = { x: d.x + 10, y: d.y + 40, w: 34, h: 22, vy: 1.5, vx: -1, crashPlayed: false };
+          d.state = "dropping";
+        }
+      } else if (d.state === "dropping") {
+        d.x -= 5;
+        const b = d.box;
+        b.vy += 0.12;
+        b.y += b.vy;
+        b.x += b.vx; // horizontal momentum
+        // Hit player
+        if (overlap(player, b)) {
+          if (player.shielded) {
+            player.shielded = false;
+            burst(b.x, b.y, "#e67e22", 6);
+            score += 25;
+            playSound("hit");
+          } else { playSound("hit"); loseLife(); return; }
+          d.state = "leaving";
+        }
+        // Crash sound near landing
+        if (!b.crashPlayed && b.vy > 0) {
+          for (const p of platforms) {
+            if (p.type === "goal") continue;
+            if (b.x + b.w > p.x && b.x < p.x + p.w && b.y + b.h >= p.y - 40 && b.y + b.h < p.y) {
+              playSound("crash");
+              b.crashPlayed = true;
+              break;
+            }
+          }
+        }
+        // Land on platform or ground
+        let landed = false;
+        for (const p of platforms) {
+          if (p.type === "goal") continue;
+          if (b.vy > 0 && b.x + b.w > p.x && b.x < p.x + p.w &&
+              b.y + b.h >= p.y && b.y + b.h <= p.y + 16 + b.vy) {
+            burst(b.x, b.y, "#e67e22", 4);
+            d.state = "leaving";
+            landed = true;
+            break;
+          }
+        }
+        if (!landed && b.y > H + 40) d.state = "leaving";
+      } else if (d.state === "leaving") {
+        d.x -= 5;
+      }
+
+      // Remove when fully off screen left
+      if (d.x < cameraX - 100) { drones.splice(i, 1); }
+    }
+  }
+
   // Expire effects
   for (const k of Object.keys(activeEffects)) {
     if (now > activeEffects[k]) delete activeEffects[k];
@@ -542,6 +734,7 @@ function update() {
 
   // HUD
   $score.textContent = "Score: " + score;
+  document.getElementById("eswag-display").textContent = "E-Swag: $" + eswag;
   $lives.textContent = "❤️".repeat(lives);
   $level.textContent = "Level " + level;
 
@@ -567,6 +760,7 @@ function loseLife() {
   lives--;
   if (lives <= 0) { gameOver(); return; }
   player.x = 50; player.y = H - 120; player.vx = 0; player.vy = 0; cameraX = 0;
+  drones = []; fallingBoxes = [];
   burst(player.x, player.y, "#e74c3c", 10);
 }
 
@@ -597,6 +791,7 @@ function advanceLevel() {
   player.x = 50; player.y = H - 120; player.vx = 0; player.vy = 0; cameraX = 0;
   goalZooming = false; goalZoomTimer = 0; goalZoomScale = 1; goalTarget = null; goalZoomCamX = 0;
   generateLevel(level);
+  applyPermanentUpgrades();
   burst(player.x, player.y, "#2ecc71", 15);
   gameState = "playing";
 }
@@ -783,79 +978,33 @@ function drawCachedBackground() {
       bg.fillRect(x, H - 39, 20, 3);
     }
   }
-  ctx.drawImage(bgCanvas, 0, 0);
+  // Tile the cached wall with 0.1× parallax scroll
+  const scrollX = -((cameraX * 0.1) % W + W) % W;
+  ctx.drawImage(bgCanvas, scrollX, 0);
+  ctx.drawImage(bgCanvas, scrollX + W, 0);
   return true;
 }
 
 function draw() {
-  // Furthest background — tiled parallax image
-  if (bgFarImg.complete && bgFarImg.naturalWidth) {
-    const scrollX = -(cameraX * 0.1) % W;
-    ctx.drawImage(bgFarImg, scrollX, 0, W, H);
-    ctx.drawImage(bgFarImg, scrollX + W, 0, W, H);
+  // Fill canvas to prevent transparency bleed-through
+  ctx.fillStyle = "#1a1a1a";
+  ctx.fillRect(0, 0, W, H);
+
+  // Furthest background — warehouse wall (0.1× parallax)
+  if (bgWallImg.complete && bgWallImg.naturalWidth) {
+    const scrollX = -((cameraX * 0.1) % W + W) % W;
+    ctx.drawImage(bgWallImg, scrollX, 0, W, H);
+    ctx.drawImage(bgWallImg, scrollX + W, 0, W, H);
   } else {
     drawCachedBackground();
   }
 
-  // Back wall — far racking (slow parallax)
-  for (let i = 0; i < 12; i++) {
-    const rx = i * 140 - (cameraX * 0.1) % 140;
-    ctx.fillStyle = "#444";
-    ctx.fillRect(rx, 60, 6, H - 100);
-    ctx.fillRect(rx + 80, 60, 6, H - 100);
-    for (let s = 0; s < 3; s++) {
-      const sy = 80 + s * 100;
-      ctx.fillStyle = "#555";
-      ctx.fillRect(rx, sy, 86, 5);
-      ctx.fillStyle = "#8B6914";
-      ctx.fillRect(rx + 8 + (s * 17 % 25), sy - 20, 24, 18);
-      ctx.fillStyle = "#A0522D";
-      ctx.fillRect(rx + 42 + (s * 11 % 15), sy - 16, 18, 14);
-      ctx.fillStyle = "#7a5c2e";
-      ctx.fillRect(rx + 65, sy - 12, 12, 10);
-    }
-  }
-
-  // Mid racking (medium parallax)
-  for (let i = 0; i < 10; i++) {
-    const rx = i * 160 - (cameraX * 0.25) % 160;
-    ctx.fillStyle = "#d35400";
-    ctx.fillRect(rx, 90, 8, H - 130);
-    ctx.fillRect(rx + 100, 90, 8, H - 130);
-    ctx.strokeStyle = "#c0392b";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(rx + 4, 120); ctx.lineTo(rx + 104, 220);
-    ctx.moveTo(rx + 104, 120); ctx.lineTo(rx + 4, 220);
-    ctx.stroke();
-    ctx.fillStyle = "#2c6fbb";
-    for (let s = 0; s < 3; s++) {
-      const sy = 130 + s * 110;
-      ctx.fillRect(rx, sy, 108, 6);
-      ctx.fillStyle = "#c8a96e";
-      ctx.fillRect(rx + 10, sy - 28, 38, 26);
-      ctx.fillStyle = "#ddd";
-      ctx.fillRect(rx + 58, sy - 24, 30, 22);
-      ctx.fillStyle = "#2c6fbb";
-    }
-  }
-
-  // Safety signs (slow parallax)
-  for (let i = 0; i < 5; i++) {
-    const sx = 200 + i * 280 - (cameraX * 0.15) % 280;
-    if (i % 2 === 0) {
-      ctx.fillStyle = "#27ae60";
-      ctx.fillRect(sx, 55, 36, 18);
-      ctx.fillStyle = "#fff";
-      ctx.font = "bold 9px sans-serif";
-      ctx.fillText("EXIT", sx + 4, 68);
-    } else {
-      ctx.fillStyle = "#2980b9";
-      ctx.fillRect(sx, 52, 28, 34);
-      ctx.fillStyle = "#fff";
-      ctx.font = "7px sans-serif";
-      ctx.fillText("SAFE", sx + 3, 72);
-      ctx.fillText("WORK", sx + 2, 80);
+  // Racking A (0.5× parallax — closest)
+  if (bgRackImg.complete && bgRackImg.naturalWidth) {
+    const rw = bgRackImg.naturalWidth * (H / bgRackImg.naturalHeight);
+    const scrollX = -((cameraX * 0.5) % rw + rw) % rw;
+    for (let x = scrollX; x < W; x += rw) {
+      ctx.drawImage(bgRackImg, x, 210, rw, H - 210);
     }
   }
 
@@ -948,16 +1097,20 @@ function draw() {
     }
   }
 
-  // Coins
+  // Coins (E-Swag Bucks)
   for (const c of coins) {
     if (c.collected) continue;
-    ctx.fillStyle = "#f1c40f";
-    ctx.beginPath();
-    ctx.arc(c.x + 11, c.y + 11, 11, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#f39c12";
-    ctx.font = "bold 13px sans-serif";
-    ctx.fillText("$", c.x + 5, c.y + 16);
+    c.bob += 0.15;
+    if (moneyImg.complete && moneyImg.naturalWidth) {
+      const frame = Math.floor(c.bob) % 6;
+      ctx.drawImage(moneyImg, frame * 24, 0, 24, 24, c.x, c.y - 4, 29, 29);
+    } else {
+      ctx.fillStyle = "#2ecc71";
+      ctx.fillRect(c.x, c.y, 22, 22);
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 11px sans-serif";
+      ctx.fillText("$", c.x + 6, c.y + 16);
+    }
   }
 
   // Hazards
@@ -1009,16 +1162,16 @@ function draw() {
   // Falling boxes
   const fallIndicator = objImages["Fall indicator"];
   for (const b of fallingBoxes) {
-    // Warning phase — flash indicator at top of screen
+    // Warning phase — flash indicator at top of screen (screen-space)
     if (b.warning > 0) {
       const flash = Math.floor(b.warning / 6) % 2 === 0;
       if (flash) {
         if (fallIndicator) {
-          ctx.drawImage(fallIndicator, b.x, 4, 34, 34);
+          ctx.drawImage(fallIndicator, b.x, 40, 34, 34);
         } else {
           ctx.fillStyle = "#e74c3c";
           ctx.font = "bold 24px sans-serif";
-          ctx.fillText("⚠", b.x + 4, 28);
+          ctx.fillText("⚠", b.x + 4, 64);
         }
       }
       continue;
@@ -1047,6 +1200,47 @@ function draw() {
     ctx.fillStyle = "#fff";
     ctx.font = "bold 16px sans-serif";
     ctx.fillText("?", qt.x + 14, qt.y + 22);
+  }
+
+  // Drones
+  for (const d of drones) {
+    const frame = Math.floor(d.animTimer) % 4;
+    const droneW = 60, droneH = 60;
+
+    // Draw warning indicator when hovering
+    if (d.state === "warning") {
+      const flash = Math.floor(d.warning / 6) % 2 === 0;
+      if (flash) {
+        const fi = objImages["Fall indicator"];
+        if (fi) {
+          ctx.drawImage(fi, d.x + 10, 40, 34, 34);
+        } else {
+          ctx.fillStyle = "#e74c3c";
+          ctx.font = "bold 24px sans-serif";
+          ctx.fillText("⚠", d.x + 14, 64);
+        }
+      }
+    }
+
+    // Draw drone
+    const droneImg = (d.state === "carrying" || d.state === "warning") ? droneWithBoxImg : droneEmptyImg;
+    if (droneImg.complete) {
+      ctx.drawImage(droneImg, frame * 48, 0, 48, 48, d.x, d.y, droneW, droneH);
+    }
+
+    // Draw dropped box
+    if (d.state === "dropping" && d.box && amazonBoxImg.complete) {
+      ctx.drawImage(amazonBoxImg, d.box.x, d.box.y, 34, 22);
+      ctx.globalAlpha = 0.2;
+      ctx.fillStyle = "#e74c3c";
+      ctx.beginPath();
+      ctx.ellipse(d.box.x + 17, H - 42, 14, 4, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  }
+  if (guruNPC && guruImg.complete && !shopVisitedThisLevel) {
+    ctx.drawImage(guruImg, guruNPC.x, guruNPC.y - 3, 55, 88);
   }
 
   // Player
@@ -1128,6 +1322,24 @@ function draw() {
   ctx.globalAlpha = 1;
 
   ctx.restore();
+
+  // HUD frame and text (drawn on canvas, above everything)
+  if (uiFrameImg.complete && uiFrameImg.naturalWidth) {
+    ctx.drawImage(uiFrameImg, 0, 0, W, 41);
+  }
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 14px 'Segoe UI', sans-serif";
+  ctx.textBaseline = "middle";
+  ctx.fillText("Score: " + score, 16, 21);
+  ctx.fillStyle = "#2ecc71";
+  ctx.fillText("E-Swag: $" + eswag, 130, 21);
+  ctx.fillStyle = "#fff";
+  ctx.fillText("Level " + level, W - 80, 21);
+  // Hearts
+  const heartStr = "❤️".repeat(Math.max(0, lives));
+  ctx.font = "16px serif";
+  ctx.fillText(heartStr, W / 2 - 30, 21);
+  ctx.textBaseline = "alphabetic";
 }
 
 // ── Leaderboard ──
@@ -1175,6 +1387,107 @@ function renderLeaderboard() {
   }
 }
 
+// ── Shop ──
+function updateShop() {
+  // Slide guru shop sprite in from left
+  const targetX = 20;
+  shopSlideX += (targetX - shopSlideX) * 0.1;
+}
+
+function drawShop() {
+  draw(); // frozen game in background
+  ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+  ctx.fillRect(0, 0, W, H);
+
+  // Guru Shop sprite sliding in from left
+  if (guruShopImg.complete) {
+    const gh = H - 40;
+    const gw = gh * (guruShopImg.naturalWidth / guruShopImg.naturalHeight);
+    ctx.drawImage(guruShopImg, shopSlideX, 20, gw, gh);
+  }
+
+  // Shop panel on right
+  const panelX = 380, panelY = 30, panelW = 420, panelH = H - 60;
+  ctx.fillStyle = "rgba(15, 30, 15, 0.95)";
+  ctx.strokeStyle = "#2ecc71";
+  ctx.lineWidth = 3;
+  ctx.fillRect(panelX, panelY, panelW, panelH);
+  ctx.strokeRect(panelX, panelY, panelW, panelH);
+
+  // Title
+  ctx.fillStyle = "#2ecc71";
+  ctx.font = "bold 22px 'Segoe UI', sans-serif";
+  ctx.fillText("⚙️ Safety Guru's Shop", panelX + 20, panelY + 32);
+
+  // Coins display
+  ctx.fillStyle = "#f1c40f";
+  ctx.font = "bold 16px sans-serif";
+  ctx.fillText("E-Swag Bucks: " + eswag, panelX + 20, panelY + 58);
+
+  // Upgrades list
+  for (let i = 0; i < SHOP_UPGRADES.length; i++) {
+    const u = SHOP_UPGRADES[i];
+    const uy = panelY + 75 + i * 62;
+    const owned = purchasedUpgrades[u.effect];
+    const selected = i === shopSelection;
+
+    // Selection highlight
+    if (selected) {
+      ctx.fillStyle = "rgba(46, 204, 113, 0.2)";
+      ctx.fillRect(panelX + 10, uy - 5, panelW - 20, 55);
+      ctx.strokeStyle = "#2ecc71";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(panelX + 10, uy - 5, panelW - 20, 55);
+    }
+
+    // Icon + name
+    ctx.font = "20px serif";
+    ctx.fillText(u.icon, panelX + 20, uy + 22);
+    ctx.fillStyle = owned ? "#888" : "#fff";
+    ctx.font = "bold 16px sans-serif";
+    ctx.fillText(u.name, panelX + 50, uy + 18);
+
+    // Description
+    ctx.fillStyle = "#aaa";
+    ctx.font = "13px sans-serif";
+    ctx.fillText(u.desc, panelX + 50, uy + 36);
+
+    // Cost or OWNED
+    if (owned) {
+      ctx.fillStyle = "#2ecc71";
+      ctx.font = "bold 14px sans-serif";
+      ctx.fillText("OWNED", panelX + panelW - 80, uy + 22);
+    } else {
+      ctx.fillStyle = eswag >= u.cost ? "#f1c40f" : "#e74c3c";
+      ctx.font = "bold 14px sans-serif";
+      ctx.fillText("$" + u.cost, panelX + panelW - 70, uy + 22);
+    }
+  }
+
+  // Controls hint
+  ctx.fillStyle = "#888";
+  ctx.font = "12px sans-serif";
+  ctx.fillText("↑↓ Select  |  Enter/Space: Buy  |  Esc: Close", panelX + 50, panelY + panelH - 15);
+}
+
+function purchaseUpgrade() {
+  const u = SHOP_UPGRADES[shopSelection];
+  if (purchasedUpgrades[u.effect] || eswag < u.cost) return;
+  eswag -= u.cost;
+  purchasedUpgrades[u.effect] = true;
+  // Apply immediate effects
+  if (u.effect === "extraLife") {
+    lives++;
+    purchasedUpgrades[u.effect] = false; // can rebuy
+  }
+  if (u.effect === "permShield") player.shielded = true;
+  playSound("powerup");
+}
+
+function applyPermanentUpgrades() {
+  if (purchasedUpgrades.permShield) player.shielded = true;
+}
+
 // ── Game Loop ──
 function loop() {
   update();
@@ -1183,9 +1496,12 @@ function loop() {
   } else if (gameState === "cinematic") {
     updateCinematic();
     drawCinematic();
+  } else if (gameState === "shop") {
+    updateShop();
+    drawShop();
   }
   requestAnimationFrame(loop);
 }
 
-showScreen("menu");
+showScreen("splash");
 loop();
