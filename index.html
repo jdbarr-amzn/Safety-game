@@ -37,21 +37,29 @@ button:hover { background: #c73652; }
 #effects { position: absolute; top: 40px; left: 10px; color: #fff; font-size: 14px; pointer-events: none; z-index: 10; }
 #controls-legend { display: flex; gap: 16px; margin-bottom: 15px; color: #aaa; font-size: 13px; }
 #controls-legend span { background: #0f3460; padding: 5px 12px; border-radius: 4px; }
-#menu-screen { background: url('Title screen/Title Background.jpg') center/cover no-repeat !important; }
+#menu-screen { background: url('Title screen/Title Background.jpg') center/cover no-repeat !important;  }
 #splash-screen { background: url('Title screen/Title Background.jpg') center/cover no-repeat !important; }
 #splash-img { width: 500px; margin-bottom: 30px; }
 #lets-play-btn { background: #2ecc71; color: #000; font-size: 24px; font-weight: bold; border: 3px solid #27ae60; padding: 16px 50px; border-radius: 8px; cursor: pointer; transition: background 0.2s; }
 #lets-play-btn:hover { background: #27ae60; color: #fff; }
-#title-img { width: 420px; margin-bottom: 0; margin-top: 30px; }
-#menu-screen p { color: #fff; font-size: 14px; margin: -8px 0 0 0; padding: 0 30px; text-shadow: 1px 1px 4px #000; }
-#menu-screen #controls-legend { margin: 2px 0; }
-#menu-screen #controls-legend span { background: rgba(0,0,0,0.7); }
-#menu-screen input { border-color: #2ecc71; background: rgba(0,0,0,0.7); margin: 2px 0; }
-#menu-buttons { display: flex; gap: 10px; }
-#menu-buttons button { background: #2ecc71; color: #000; font-weight: bold; border: 2px solid #27ae60; }
+#title-img { width: 320px; margin-bottom: 0; margin-top: 5px; }
+#menu-screen p { color: #fff; font-size: 11px; margin: -8px 0 0 0; padding: 0 30px; text-shadow: 1px 1px 4px #000; }
+#menu-screen #controls-legend { margin: 1px 0; font-size: 10px; gap: 8px; }
+#menu-screen #controls-legend span { background: rgba(0,0,0,0.7); padding: 3px 8px; }
+#menu-screen input { border-color: #2ecc71; background: rgba(0,0,0,0.7); margin: 1px 0; padding: 5px 14px; font-size: 14px; }
+#menu-buttons { display: flex; gap: 6px; }
+#menu-buttons button { background: #2ecc71; color: #000; font-weight: bold; border: 2px solid #27ae60; padding: 8px 16px; font-size: 14px; }
 #menu-buttons button:hover { background: #27ae60; color: #fff; }
 @keyframes slideInRight { from { transform: translateX(200px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-#menu-man { position: absolute; bottom: 0; right: -60px; height: 320px; pointer-events: none; animation: slideInRight 0.8s ease-out forwards; }
+#menu-man { position: absolute; bottom: 0; right: -60px; height: 320px; pointer-events: none; animation: slideInRight 0.8s ease-out forwards; z-index: 1; }
+.btn-highlight { outline: 3px solid #2ecc71 !important; background: #1a4a1a !important; }
+#osk button { padding: 6px 10px; font-size: 14px; min-width: 28px; background: #333; color: #fff; border: 1px solid #555; border-radius: 4px; cursor: pointer; }
+#osk button.btn-highlight { background: #2ecc71 !important; color: #000 !important; }
+.lvl-btn { padding: 6px 12px; font-size: 14px; font-weight: bold; background: #333; color: #fff; border: 2px solid #2ecc71; border-radius: 6px; cursor: pointer; min-width: 36px; }
+.lvl-btn:hover { background: #2ecc71; color: #000; }
+.lvl-locked { background: #8b0000 !important; border-color: #e74c3c !important; opacity: 0.6; cursor: not-allowed !important; }
+.lvl-locked:hover { background: #8b0000 !important; color: #fff !important; }
+#level-select { position: relative; z-index: 5; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -79,9 +87,23 @@ button:hover { background: #c73652; }
       <span>⚠️ Touch signs for safety quiz</span>
     </div>
     <input id="player-name" placeholder="Enter your name" maxlength="15">
+    <div id="osk" style="display:none;flex-wrap:wrap;gap:4px;max-width:400px;justify-content:center;margin-bottom:8px;"></div>
     <div id="menu-buttons">
       <button id="start-btn">Start Game</button>
+      <button id="level-select-btn">Level Select</button>
       <button id="leaderboard-btn">Leaderboard</button>
+    </div>
+    <div id="level-select" style="display:none;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px;">
+      <button class="lvl-btn" data-lvl="1">1</button>
+      <button class="lvl-btn" data-lvl="2">2</button>
+      <button class="lvl-btn" data-lvl="3">3</button>
+      <button class="lvl-btn" data-lvl="4">4</button>
+      <button class="lvl-btn" data-lvl="5">5</button>
+      <button class="lvl-btn" data-lvl="6">6</button>
+      <button class="lvl-btn lvl-locked" data-lvl="7">7</button>
+      <button class="lvl-btn lvl-locked" data-lvl="8">8</button>
+      <button class="lvl-btn lvl-locked" data-lvl="9">9</button>
+      <button class="lvl-btn lvl-locked" data-lvl="10">10</button>
     </div>
     <img src="Title screen/Man_leaning-removebg-preview.png" alt="" id="menu-man">
   </div>
@@ -93,6 +115,7 @@ button:hover { background: #c73652; }
 
   <div id="gameover-screen" class="overlay hidden">
     <h2>Game Over!</h2>
+    <p id="safety-tip-text" style="color:#2ecc71;font-style:italic;padding:0 40px;text-align:center;font-size:16px;margin-bottom:10px;"></p>
     <p id="final-score"></p>
     <button id="restart-btn">Play Again</button>
     <button id="go-leaderboard-btn">Leaderboard</button>
@@ -101,6 +124,7 @@ button:hover { background: #c73652; }
 
   <div id="leaderboard-screen" class="overlay hidden">
     <h2>🏆 Leaderboard</h2>
+    <p id="leaderboard-site" style="margin:-10px 0 10px;font-size:14px;color:#2ecc71;"></p>
     <ol id="leaderboard-list"></ol>
     <button id="back-btn">Back to Menu</button>
   </div>

@@ -1,17 +1,38 @@
 // ── Data ──
 const QUESTIONS = [
-  { q: "What should you do if you see a spill on the floor?", a: ["Clean it up or report it immediately", "Walk around it", "Ignore it", "Cover it with paper"], c: 0 },
-  { q: "What does a yellow warning sign typically indicate?", a: ["Caution - potential hazard", "All clear", "Emergency exit", "Break room ahead"], c: 0 },
-  { q: "What is the first thing to do in a fire emergency?", a: ["Activate the fire alarm", "Open windows", "Gather belongings", "Continue working"], c: 0 },
-  { q: "When should you wear PPE?", a: ["Whenever the task requires it", "Only on Mondays", "When the boss is watching", "Never"], c: 0 },
-  { q: "What does OSHA stand for?", a: ["Occupational Safety and Health Administration", "Office of Safety Hazard Assessment", "Organization for Safe Handling Activities", "Operational Standards for Health Assurance"], c: 0 },
-  { q: "What should you do before using a ladder?", a: ["Inspect it for damage", "Just climb it", "Ask someone to hold it only", "Use it as-is"], c: 0 },
-  { q: "How often should fire extinguishers be inspected?", a: ["Monthly", "Every 5 years", "Only after use", "Never"], c: 0 },
-  { q: "What is the correct way to lift heavy objects?", a: ["Bend your knees, keep back straight", "Bend at the waist", "Twist and pull", "Use one hand"], c: 0 },
-  { q: "What should you do if you find damaged electrical equipment?", a: ["Tag it out and report it", "Keep using it carefully", "Fix it yourself", "Ignore it"], c: 0 },
-  { q: "What is an SDS?", a: ["Safety Data Sheet", "Standard Danger Signal", "Safety Detection System", "Secure Data Storage"], c: 0 },
-  { q: "Where should emergency exits be?", a: ["Clearly marked and unobstructed", "Locked for security", "Hidden from visitors", "Near heavy equipment only"], c: 0 },
-  { q: "What color is typically used for fire equipment?", a: ["Red", "Blue", "Green", "Yellow"], c: 0 },
+  { q: "What does PPE stand for?", a: ["Personal Protective Equipment", "Process Path Engineering", "Preventive Protection Evaluation", "Personal Process Equipment"], c: 0 },
+  { q: "What should you do when you hear the fire alarm?", a: ["Continue working until your manager tells you to stop", "Immediately evacuate to your designated assembly point", "Call your manager first", "Wait for the strobe lights to activate"], c: 1 },
+  { q: "What color is a high-visibility safety vest?", a: ["Blue", "Red", "Yellow/Orange (high-vis)", "White"], c: 2 },
+  { q: "What is the purpose of 5S floor markings in the facility?", a: ["Decoration", "To indicate safe zones, walkways, and hazard areas", "To show where to store personal items", "To mark break areas only"], c: 1 },
+  { q: "What is the Andon system used for?", a: ["Tracking packages", "Alerting leadership to issues, including safety concerns", "Clocking in and out", "Ordering supplies"], c: 1 },
+  { q: "What type of footwear is required on the warehouse floor?", a: ["Open-toed shoes", "Safety footwear (slip-resistant, closed-toe)", "Any comfortable sneakers", "Steel-toed boots only"], c: 1 },
+  { q: "What should you do if you find a leaking or damaged product?", a: ["Ignore it and keep working", "Clean it up yourself without PPE", "Stop, do not touch it, and use the Andon to alert leadership", "Put it back on the shelf"], c: 2 },
+  { q: "What does 'STF' stand for in safety?", a: ["Standard Task Function", "Slip, Trip, Fall", "Safety Training Form", "Shift Transfer Form"], c: 1 },
+  { q: "What is the 'Power Zone' for lifting?", a: ["The area near electrical panels", "The zone between your mid-thigh and mid-chest where lifting is safest", "The highest shelf on a rack", "The area closest to the conveyor belt"], c: 1 },
+  { q: "What is the first thing you should do if you get hurt at work?", a: ["Post about it on social media", "Wait until your next break to tell someone", "Report it immediately to your manager or AM", "Go home and rest"], c: 2 },
+  { q: "What does MSD stand for?", a: ["Material Safety Document", "Musculoskeletal Disorder", "Machine Safety Deficiency", "Management Safety Directive"], c: 1 },
+  { q: "When lifting a box from the floor, what is the correct body position?", a: ["Bend at the waist with straight legs", "Bend your knees, keep your back straight, and lift with your legs", "Twist your body to grab the item quickly", "Reach as far as possible to avoid stepping closer"], c: 1 },
+  { q: "What does a red floor marking or red tape typically indicate?", a: ["Pedestrian walkway", "Hazard zone, danger, or fire equipment location", "Storage area for totes", "Break area boundary"], c: 1 },
+  { q: "When working near PIT equipment, what PPE is required?", a: ["Hard hat only", "High-visibility safety vest", "Ear plugs", "Safety goggles"], c: 1 },
+  { q: "What is the purpose of a PMV (Process Method Visual)?", a: ["To track associate productivity", "To provide visual step-by-step instructions for safe standard work", "To display break schedules", "To show building evacuation routes"], c: 1 },
+  { q: "What is the primary purpose of machine guarding on conveyors?", a: ["To keep packages from falling off", "To prevent associates from contacting moving parts (pinch points)", "To reduce noise levels", "To improve package flow"], c: 1 },
+  { q: "What should you do if you notice peeling or damaged 5S tape on the floor?", a: ["Ignore it — maintenance will find it eventually", "Report it as a hazard because it can cause a trip/fall", "Peel it off yourself", "Cover it with a box"], c: 1 },
+  { q: "What should a PIT operator do when approaching a crosswalk?", a: ["Speed up to clear the area quickly", "Honk the horn and keep going", "Stop, observe surroundings, and give pedestrians the right of way", "Flash the lights and proceed"], c: 2 },
+  { q: "You're picking items from a tote below your knee level. What should you do?", a: ["Bend at the waist and reach down quickly", "Use a staggered stance, bend your knees, and bring the item into your power zone", "Ask someone else to do it", "Lift with one hand to save time"], c: 1 },
+  { q: "What is the main reason repetitive motion injuries happen in pick and pack?", a: ["Associates don't drink enough water", "Frequent lifting/lowering and gripping outside the power zone combined with awkward postures", "The building is too cold", "Associates work too few hours"], c: 1 },
+  { q: "An associate feels a sharp pain in their back while lifting. What should they do FIRST?", a: ["Finish the task and report it at end of shift", "Stop the task immediately and report the injury to their manager/AM right away", "Take ibuprofen and keep working", "Switch to a different station without telling anyone"], c: 1 },
+  { q: "Why is it important to report even minor injuries or near misses?", a: ["So you can leave work early", "It helps identify hazards before they cause a serious injury and creates a record for your protection", "It's only important for recordable injuries", "It doesn't matter unless you need medical treatment"], c: 1 },
+  { q: "You notice a coworker lifting with their back bent and legs straight. What's the best action?", a: ["Mind your own business", "Politely coach them on proper lifting technique or alert your AM/WHSS", "Report them to HR immediately", "Start doing it the same way so you match their pace"], c: 1 },
+  { q: "What is the purpose of job rotation in physically demanding process paths?", a: ["To confuse associates", "To reduce cumulative strain on the same muscle groups and provide recovery time", "To increase productivity metrics", "To punish underperformers"], c: 1 },
+  { q: "What is the weight limit for a single person to carry without mechanical assistance?", a: ["75 lbs", "50 lbs", "100 lbs", "35 lbs"], c: 1 },
+  { q: "What is the correct way to handle a box that is too heavy or awkward to lift alone?", a: ["Try harder and use momentum", "Drag it across the floor", "Ask for a team lift or use mechanical assistance (dolly, cart, EPJ)", "Lift it above your head to get better leverage"], c: 2 },
+  { q: "What information should you provide when reporting a workplace injury?", a: ["Just your name", "Your name, what happened, where it happened, when it happened, and what body part is affected", "Only the date", "Nothing — your manager will figure it out"], c: 1 },
+  // Additional questions
+  { q: "What should you do before entering a PIT operating area as a pedestrian?", a: ["Just walk in carefully", "Make eye contact with the operator and wait for acknowledgment", "Wave your hand and enter", "Enter only from the left side"], c: 1 },
+  { q: "What is the correct action if you see a blocked emergency exit?", a: ["Use a different exit if there's a fire", "Report it immediately — exits must remain clear at all times", "Move the obstruction yourself even if it's heavy", "Ignore it since fires rarely happen"], c: 1 },
+  { q: "How far should you stay from the edge of a loading dock?", a: ["No specific distance required", "At least 6 feet unless protected by a barrier or performing dock work", "1 foot is fine", "Only matters when trucks are present"], c: 1 },
+  { q: "What is the safest way to carry a box with limited visibility?", a: ["Peek around the side while walking fast", "Use a cart, or ask for help so you can see your path clearly", "Walk backwards", "Carry it above your head"], c: 1 },
+  { q: "What does LOTO stand for?", a: ["Lock Out Tag Out — used to secure equipment during maintenance", "Lights Out Turn Off — used during evacuations", "Load Out Transfer Order — used for shipping", "Log Out Time Off — used for breaks"], c: 0 },
 ];
 
 const HAZARD_TYPES = [
@@ -22,11 +43,11 @@ const HAZARD_TYPES = [
 ];
 
 const POWERUP_TYPES = [
-  { name: "Hard Hat", emoji: "⛑️", color: "#f39c12", effect: "shield" },
-  { name: "Safety Boots", emoji: "🥾", color: "#2980b9", effect: "doublejump" },
-  { name: "First Aid", emoji: "🩹", color: "#e74c3c", effect: "heal" },
-  { name: "Safety Vest", emoji: "🦺", color: "#e67e22", effect: "points" },
-  { name: "Gloves", emoji: "🧤", color: "#8e44ad", effect: "magnet" },
+  { name: "Hard Hat", emoji: "⛑️", color: "#f39c12", effect: "shield", sprite: "powerup-hardhat" },
+  { name: "Safety Boots", emoji: "🥾", color: "#2980b9", effect: "doublejump", sprite: "powerup-boots" },
+  { name: "First Aid", emoji: "🩹", color: "#e74c3c", effect: "heal", sprite: "powerup-bandage" },
+  { name: "Safety Vest", emoji: "🦺", color: "#e67e22", effect: "points", sprite: "powerup-vest" },
+  { name: "Gloves", emoji: "🧤", color: "#8e44ad", effect: "magnet", sprite: "powerup-gloves" },
 ];
 
 // ── Canvas ──
@@ -49,7 +70,7 @@ const SPRITE_DEFS = {
   "player-jump":   { src: "sprites/player-jump.png",   cols: 5, rows: 5, fw: 324, fh: 610, frames: 25 },
   "player-shield": { src: "sprites/player-shield.png", cols: 5, rows: 5, fw: 252, fh: 520, frames: 25 },
   "hazard-wetfloor": { src: "sprites/hazard-wetfloor.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1, drawH: 140, offsetY: 67 },
-  "hazard-fire": { src: "sprites/Fire Hazard.png", cols: 8, rows: 1, fw: 32, fh: 48, frames: 8, drawH: 58, offsetY: 5, noFlip: true },
+  "hazard-fire": { src: "sprites/Fire Hazard.png", cols: 8, rows: 1, fw: 32, fh: 48, frames: 8, drawH: 91, offsetY: 5, noFlip: true },
   "hazard-electrical": { src: "sprites/hazard-electrical.png", cols: 3, rows: 3, fw: 120, fh: 120, frames: 9, drawH: 90, offsetY: 5, noFlip: true },
   "hazard-chemical": { src: "sprites/hazard-chemical.png", cols: 1, rows: 1, fw: 791, fh: 791, frames: 1, drawH: 110, offsetY: 58, noFlip: true },
   "manager": { src: "sprites/manager.png", cols: 1, rows: 1, fw: 120, fh: 120, frames: 1 },
@@ -139,6 +160,60 @@ boxBG2.src = "sprites/Objects/Box BG2.png";
 const uiFrameImg = new Image();
 uiFrameImg.src = "sprites/UI Frame A.png";
 
+// Checkpoint sprites
+const checkpointAImg = new Image();
+checkpointAImg.src = "sprites/Objects/Checkpoint A.png";
+const checkpointBImg = new Image();
+checkpointBImg.src = "sprites/Objects/Checkpoint B.png";
+const checkpointFlashImg = new Image();
+checkpointFlashImg.src = "sprites/Objects/Checkpoint flash.png";
+
+// Power-up sprites
+const powerupSprites = {};
+const POWERUP_SPRITE_MAP = {
+  "powerup-hardhat": "sprites/Objects/Hard hat.png",
+  "powerup-boots": "sprites/Objects/Boots.png",
+  "powerup-vest": "sprites/Objects/Vest.png",
+  "powerup-gloves": "sprites/Objects/Gloves.png",
+  "powerup-bandage": "sprites/Objects/Bandage.png",
+};
+for (const [key, src] of Object.entries(POWERUP_SPRITE_MAP)) {
+  const img = new Image(); img.src = src; powerupSprites[key] = img;
+}
+
+// PIT crossing sprites
+const crossingBeamImg = new Image();
+crossingBeamImg.src = "sprites/Objects/Crossing Beam.png";
+const pitVehicleImg = new Image();
+pitVehicleImg.src = "sprites/Objects/PIT.png";
+const aSafeImg = new Image();
+aSafeImg.src = "sprites/Objects/A-safe.png";
+
+// Conveyor sprites (8 frames, 97x23 each, vertical sheet)
+const conveyLeftImg = new Image();
+conveyLeftImg.src = "sprites/Objects/Conveyer levels/conveyance left.png";
+const conveyRightImg = new Image();
+conveyRightImg.src = "sprites/Objects/Conveyer levels/Conveyance right.png";
+
+// Direction post sprites
+const postLeftImg = new Image();
+postLeftImg.src = "sprites/Objects/Post left.png";
+const postRightImg = new Image();
+postRightImg.src = "sprites/Objects/Post right.png";
+
+// Elevated conveyor sprite (3 frames, 291x120 each, vertical sheet)
+const elevConveyImg = new Image();
+elevConveyImg.src = "sprites/Objects/Conveyer levels/Elevated Conveyance Right.png";
+
+// Robot sprites (5 frames per direction, 64x128)
+// 0=stationary, 1=start moving, 2-3=moving cycle, 4=stopping
+const robotLeftFrames = [];
+const robotRightFrames = [];
+for (let i = 0; i < 5; i++) {
+  const l = new Image(); l.src = "sprites/Objects/Robot left " + i + ".png"; robotLeftFrames.push(l);
+  const r = new Image(); r.src = "sprites/Objects/Robot Right " + i + ".png"; robotRightFrames.push(r);
+}
+
 // ── Sound ──
 const SFX = {};
 function loadSound(name, src, vol) {
@@ -189,6 +264,13 @@ let currentQuestion = null;
 let lastBoxSpawn = 0;
 let lastDroneSpawn = 0;
 let drones = []; // { x, y, targetX, state: "carrying"|"warning"|"dropping"|"leaving", warning, box: {x,y,vy} }
+let robots = []; // { x, y, w, h, facing, speed, originX, patrolRange, animTimer }
+let pitfalls = [];
+let checkpoint = null; // { x, y, activated, flashTimer }
+let conveyors = []; // { x, y, w, h, dir } — dir: 1=right, -1=left
+let conveyorDir = 1; // current global direction
+let conveyorTimer = 0; // ticks since last flip
+let conveyorAnimTimer = 0;
 let goalZooming = false, goalZoomTimer = 0, goalZoomScale = 1, goalTarget = null, goalZoomCamX = 0;
 
 // ── Shop State ──
@@ -254,15 +336,34 @@ document.addEventListener("keydown", e => {
     if (e.code === "Enter" || e.code === "Space") purchaseUpgrade();
     if (e.code === "Escape") { gameState = "playing"; Object.keys(keys).forEach(k => keys[k] = false); }
   }
+  if (gameState === "question") {
+    const numAnswers = currentQuestion ? currentQuestion.answers.length : 4;
+    if (e.code === "ArrowUp" || e.code === "KeyW") { questionSelection = (questionSelection - 1 + numAnswers) % numAnswers; highlightAnswer(); }
+    if (e.code === "ArrowDown" || e.code === "KeyS") { questionSelection = (questionSelection + 1) % numAnswers; highlightAnswer(); }
+    if (e.code === "Enter" || e.code === "Space") submitAnswer(questionSelection);
+  }
 });
 document.addEventListener("keyup", e => keys[e.code] = false);
 
-document.getElementById("start-btn").addEventListener("click", startGame);
-document.getElementById("restart-btn").addEventListener("click", startGame);
+document.getElementById("start-btn").addEventListener("click", () => startGame());
+document.getElementById("restart-btn").addEventListener("click", () => startGame());
 document.getElementById("leaderboard-btn").addEventListener("click", () => renderLeaderboard());
 document.getElementById("go-leaderboard-btn").addEventListener("click", () => renderLeaderboard());
 document.getElementById("go-menu-btn").addEventListener("click", () => showScreen("menu"));
 document.getElementById("back-btn").addEventListener("click", () => showScreen("menu"));
+
+// Level select
+document.getElementById("level-select-btn").addEventListener("click", () => {
+  const ls = document.getElementById("level-select");
+  ls.style.display = ls.style.display === "none" ? "flex" : "none";
+});
+document.querySelectorAll(".lvl-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    if (btn.classList.contains("lvl-locked")) return;
+    const lvl = parseInt(btn.dataset.lvl);
+    startGame(lvl);
+  });
+});
 
 // ── Level Generation ──
 // Jump: vy=-11.9, gravity=0.48. Max height ~147px, max horizontal ~248px.
@@ -278,9 +379,14 @@ function seededRandom() {
 
 function generateLevel(lvl) {
   seed = lvl * 7919; // deterministic seed per level
-  platforms = []; hazards = []; powerups = []; coins = []; questionTriggers = []; fallingBoxes = []; railings = []; drones = [];
+  platforms = []; hazards = []; powerups = []; coins = []; questionTriggers = []; fallingBoxes = []; railings = []; drones = []; robots = []; conveyors = [];
   const groundY = H - 40;
   const levelWidth = 3000 + lvl * 1000;
+
+  // Filter hazard types by level
+  const levelHazards = lvl >= 4
+    ? []
+    : HAZARD_TYPES;
 
   const goalX = levelWidth - 100;
 
@@ -303,23 +409,40 @@ function generateLevel(lvl) {
   }
 
   // Level-specific pitfalls — carve before spawning objects
+  pitfalls = [];
   if (lvl === 1) {
-    const pitfalls = [[960, 1100], [1250, 1400]];
-    for (const [gapStart, gapEnd] of pitfalls) {
-      platforms = platforms.filter(p => {
-        if (p.type !== "ground") return true;
-        if (p.x >= gapStart && p.x + p.w <= gapEnd) return false;
-        if (p.x < gapStart && p.x + p.w > gapStart) { p.w = gapStart - p.x; }
-        if (p.x < gapEnd && p.x + p.w > gapEnd) { const oldEnd = p.x + p.w; p.x = gapEnd; p.w = oldEnd - gapEnd; }
-        return true;
-      });
+    pitfalls = [[960, 1100], [1250, 1400]];
+  } else if (lvl === 4) {
+    pitfalls = [[800, 960], [1200, 1380], [1700, 1860], [2400, 2580]];
+  } else if (lvl === 5) {
+    pitfalls = [[700, 880], [1100, 1300], [1600, 1780], [2100, 2300], [2700, 2880]];
+  } else if (lvl >= 6) {
+    // Auto-generate pitfalls for higher levels
+    for (let px = 600; px < levelWidth - 400; px += 400 + Math.floor(seededRandom() * 300)) {
+      const gapW = 120 + Math.floor(seededRandom() * 60);
+      pitfalls.push([px, px + gapW]);
+      px += gapW;
     }
+  }
+  for (const [gapStart, gapEnd] of pitfalls) {
+    platforms = platforms.filter(p => {
+      if (p.type !== "ground") return true;
+      if (p.x >= gapStart && p.x + p.w <= gapEnd) return false;
+      if (p.x < gapStart && p.x + p.w > gapStart) { p.w = gapStart - p.x; }
+      if (p.x < gapEnd && p.x + p.w > gapEnd) { const oldEnd = p.x + p.w; p.x = gapEnd; p.w = oldEnd - gapEnd; }
+      return true;
+    });
   }
 
   // Helper: check if x position has ground beneath it
   const grounds = platforms.filter(p => p.type === "ground");
   function hasGround(x) {
     return grounds.some(p => x >= p.x && x + 30 <= p.x + p.w);
+  }
+
+  // Helper: check if x range overlaps any pitfall
+  function overPitfall(x, w) {
+    return pitfalls.some(([gs, ge]) => x + w > gs && x < ge);
   }
 
   // Helper: check if position overlaps any placed object
@@ -334,7 +457,7 @@ function generateLevel(lvl) {
   let lastY = groundY;
   for (let x = 300; x < goalX - 150; x += 120 + seededRandom() * 160) {
     const w = 80 + seededRandom() * 80;
-    if (!hasGround(x) || !hasGround(x + w - 30)) { continue; }
+    if (!hasGround(x) || !hasGround(x + w - 30) || overPitfall(x, w)) { continue; }
     const dir = seededRandom() < 0.6 ? -1 : 1;
     let y = lastY + dir * (40 + seededRandom() * (MAX_STEP - 40));
     y = Math.max(groundY - MAX_STEP, Math.min(groundY - 60, y));
@@ -342,8 +465,8 @@ function generateLevel(lvl) {
     platforms.push({ x, y, w, h: 16, type: "float" });
     if (seededRandom() > 0.4) {
       coins.push({ x: x + w / 2 - 8, y: y - 43, w: 22, h: 22, collected: false, bob: 0 });
-    } else if (seededRandom() < 0.3 && !tooClose(x + w / 2)) {
-      const ht = HAZARD_TYPES[Math.floor(seededRandom() * HAZARD_TYPES.length)];
+    } else if (levelHazards.length > 0 && seededRandom() < 0.3 && !tooClose(x + w / 2)) {
+      const ht = levelHazards[Math.floor(seededRandom() * levelHazards.length)];
       hazards.push({ x: x + w / 2 - 20, y: y - 58, w: 40, h: 40, type: ht, timer: seededRandom() * 6 });
       placeAt(x + w / 2);
     }
@@ -354,24 +477,26 @@ function generateLevel(lvl) {
   // Railings — spawn first so hazards avoid them
   railings = [];
   for (let x = 300; x < goalX - 200; x += 300 + seededRandom() * 400) {
-    if (!hasGround(x) || tooClose(x)) continue;
+    if (!hasGround(x) || tooClose(x) || overPitfall(x, 200)) continue;
     const count = 1 + Math.floor(seededRandom() * 3);
     railings.push({ x, y: groundY, count });
     placeAt(x);
   }
 
   // Hazards on ground — also check not near pitfall edges
-  for (let x = 500; x < goalX - 100; x += 200 + seededRandom() * 300) {
-    if (!hasGround(x) || !hasGround(x + 60) || tooClose(x)) continue;
-    const ht = HAZARD_TYPES[Math.floor(seededRandom() * HAZARD_TYPES.length)];
-    const h = { x, y: groundY - 42, w: 40, h: 40, type: ht, timer: seededRandom() * 6, facing: 1 };
-    if (ht.patrols) {
-      h.originX = x;
-      h.patrolRange = 60 + seededRandom() * 60;
-      h.patrolSpeed = 0.5 + seededRandom() * 0.5;
+  if (levelHazards.length > 0) {
+    for (let x = 500; x < goalX - 100; x += 200 + seededRandom() * 300) {
+      if (!hasGround(x) || !hasGround(x + 60) || tooClose(x) || overPitfall(x, 60)) continue;
+      const ht = levelHazards[Math.floor(seededRandom() * levelHazards.length)];
+      const h = { x, y: groundY - 42, w: 40, h: 40, type: ht, timer: seededRandom() * 6, facing: 1 };
+      if (ht.patrols) {
+        h.originX = x;
+        h.patrolRange = 60 + seededRandom() * 60;
+        h.patrolSpeed = 0.5 + seededRandom() * 0.5;
+      }
+      hazards.push(h);
+      placeAt(x);
     }
-    hazards.push(h);
-    placeAt(x);
   }
 
   // Power-ups — only on solid ground or above floating platforms, not over pitfalls
@@ -390,10 +515,105 @@ function generateLevel(lvl) {
   }
 
   // Question triggers
-  for (let x = 600; x < goalX - 100; x += 500 + seededRandom() * 400) {
-    if (!hasGround(x) || tooClose(x)) continue;
-    questionTriggers.push({ x, y: groundY - 50, w: 46, h: 46, used: false });
-    placeAt(x);
+  if (lvl >= 4 && pitfalls.length > 0) {
+    // Place at landing edges of pitfalls — unavoidable
+    for (const [gapStart, gapEnd] of pitfalls) {
+      // Find ground right after the gap
+      const landingGround = platforms.find(p => p.type === "ground" && p.x <= gapEnd + 10 && p.x + p.w > gapEnd);
+      if (landingGround) {
+        const qx = gapEnd + 5;
+        questionTriggers.push({ x: qx, y: groundY - 50, w: 46, h: 46, used: false });
+        placeAt(qx);
+      }
+    }
+  } else {
+    for (let x = 600; x < goalX - 100; x += 500 + seededRandom() * 400) {
+      if (!hasGround(x) || tooClose(x)) continue;
+      questionTriggers.push({ x, y: groundY - 50, w: 46, h: 46, used: false });
+      placeAt(x);
+    }
+  }
+
+  // Roaming robots — level 4+
+  if (lvl >= 4) {
+    // Hand-placed robot after pitfall 3 on level 4
+    if (lvl === 4) {
+      robots.push({ x: 1900, y: groundY - 70, w: 64, h: 70, facing: -1, speed: 1.5, originX: 1900, patrolRange: 120, animTimer: 0, animState: "idle", stateTimer: 0 });
+    }
+
+    const robotCount = 3 + Math.floor((lvl - 4) * 1.5);
+    let placed = 0;
+    for (let i = 0; i < robotCount * 5 && placed < robotCount; i++) {
+      const rx = 500 + Math.floor(seededRandom() * (goalX - 700));
+      if (!hasGround(rx) || !hasGround(rx + 64) || overPitfall(rx, 64)) continue;
+      // Only check distance from other robots, not all objects
+      if (robots.some(r => Math.abs(r.x - rx) < 200)) continue;
+      const facing = seededRandom() < 0.5 ? -1 : 1;
+      const range = 150 + Math.floor(seededRandom() * 200);
+      const spd = 1 + seededRandom() * 1.5;
+      robots.push({ x: rx, y: groundY - 70, w: 64, h: 70, facing, speed: spd, originX: rx, patrolRange: range, animTimer: 0, animState: "idle", stateTimer: 0 });
+      placed++;
+    }
+
+    // Remove floating platforms that overlap robot patrol paths
+    platforms = platforms.filter(p => {
+      if (p.type !== "float") return true;
+      for (const r of robots) {
+        const patrolLeft = r.originX - r.patrolRange - 30;
+        const patrolRight = r.originX + r.patrolRange + 30;
+        if (p.x + p.w > patrolLeft && p.x < patrolRight) return false;
+      }
+      return true;
+    });
+  }
+
+  // Checkpoint at middle of level
+  const midX = Math.floor(goalX / 2);
+  // Find nearest ground position to midpoint
+  let cpX = midX;
+  for (let dx = 0; dx < 300; dx += 10) {
+    if (hasGround(midX + dx) && !overPitfall(midX + dx, 32)) { cpX = midX + dx; break; }
+    if (hasGround(midX - dx) && !overPitfall(midX - dx, 32)) { cpX = midX - dx; break; }
+  }
+  checkpoint = { x: cpX, y: groundY - 83, w: 48, h: 60, activated: false, flashTimer: 0 };
+
+  // Conveyor levels (6-8) — conveyors sit on top of ground tiles
+  if (lvl >= 6 && lvl <= 8) {
+    conveyorDir = 1;
+    conveyorTimer = 0;
+    // Remove everything except ground and goal
+    platforms = platforms.filter(p => p.type === "ground" || p.type === "goal");
+    hazards = []; powerups = []; coins = []; questionTriggers = []; railings = []; robots = [];
+
+    // First conveyor — elevated in front of player start, must jump to reach
+    const firstConvX = 200;
+    const firstConvW = 291;
+    const firstConvY = groundY - 120;    conveyors.push({ x: firstConvX, y: firstConvY, w: firstConvW, h: 23, elevated: true });
+    platforms.push({ x: firstConvX, y: firstConvY + 15, w: firstConvW, h: 23, type: "float" });
+
+    // Ground-level conveyors on ALL ground platforms
+    for (const p of platforms) {
+      if (p.type === "ground" && p.w >= 97) {
+        if (overPitfall(p.x, p.w)) continue;
+        conveyors.push({ x: p.x, y: p.y - 23, w: p.w, h: 23 });
+        p.y -= 23;
+      }
+    }
+
+    // Elevated conveyors throughout the level
+    const elevCount = 10 + lvl;
+    let lastFx = firstConvX + firstConvW + 100;
+    for (let i = 0; i < elevCount * 3; i++) {
+      if (conveyors.filter(c => c.elevated).length >= elevCount) break;
+      const fx = lastFx + 100 + Math.floor(seededRandom() * 200);
+      if (fx > goalX - 300) break;
+      const fw = 291;
+      const fy = groundY - 120;
+      if (overPitfall(fx + fw / 2, 50)) { lastFx = fx + 100; continue; }
+      conveyors.push({ x: fx, y: fy, w: fw, h: 23, elevated: true });
+      platforms.push({ x: fx, y: fy + 15, w: fw, h: 23, type: "float" });
+      lastFx = fx + fw;
+    }
   }
 
   // Manager goal — ensure ground exists beneath
@@ -411,15 +631,16 @@ function generateLevel(lvl) {
 }
 
 // ── Start Game ──
-function startGame() {
-  bgCanvas = null; // reset cached background
+function startGame(startLevel) {
+  bgCanvas = null;
   playerName = document.getElementById("player-name").value.trim() || "Player";
-  score = 0; lives = 3; level = 1; cameraX = 0; eswag = 0;
+  score = 0; lives = 3; level = (typeof startLevel === "number") ? startLevel : 1; cameraX = 0; eswag = 0;
   activeEffects = {}; usedQuestions = new Set(); particles = [];
   purchasedUpgrades = {};
-  player = { x: 50, y: H - 120, w: 40, h: 72, vx: 0, vy: 0, onGround: false, facing: 1, shielded: false, frame: 0 };
+  player = { x: 50, y: H - 160, w: 40, h: 72, vx: 0, vy: 0, onGround: false, facing: 1, shielded: false, frame: 0 };
   lastBoxSpawn = 0;
   lastDroneSpawn = 0;
+  conveyorDir = 1; conveyorTimer = 0; conveyorAnimTimer = 0;
   goalZooming = false; goalZoomTimer = 0; goalZoomScale = 1; goalTarget = null; goalZoomCamX = 0;
   generateLevel(level);
   showScreen("playing");
@@ -490,7 +711,7 @@ function update() {
   }
 
   // Fall death
-  if (player.y > H + 50) { loseLife(); return; }
+  if (player.y > H + 50) { loseLife("pitfall"); return; }
 
   // Camera
   cameraX += (player.x - W / 3 - cameraX) * 0.1;
@@ -555,7 +776,7 @@ function update() {
         hazards.splice(i, 1);
         score += 25;
         playSound("hit");
-      } else { playSound("hit"); loseLife(); return; }
+      } else { playSound("hit"); loseLife(h.type.name === "Fire" ? "fire" : h.type.name === "Electrical" ? "electrical" : h.type.name === "Chemical Spill" ? "chemical" : "wetfloor"); return; }
     }
   }
 
@@ -594,14 +815,39 @@ function update() {
     // Remove if off screen
     if (b.y > H + 40) { fallingBoxes.splice(i, 1); continue; }
     // Hit player
+    // Land on platform — check before player hit
+    let boxLanded = false;
+    for (const p of platforms) {
+      if (p.type === "goal") continue;
+      if (b.vy > 0 && b.x + b.w > p.x && b.x < p.x + p.w &&
+          b.y + b.h >= p.y && b.y + b.h <= p.y + 16 + b.vy) {
+        burst(b.x, b.y, "#e67e22", 4);
+        fallingBoxes.splice(i, 1);
+        boxLanded = true;
+        break;
+      }
+    }
+    if (boxLanded) continue;
+    // Hit player (only if no platform between box and player)
     if (overlap(player, b)) {
-      fallingBoxes.splice(i, 1);
-      if (player.shielded) {
-        player.shielded = false;
-        burst(b.x, b.y, "#e67e22", 6);
-        score += 25;
-        playSound("hit");
-      } else { playSound("hit"); loseLife(); return; }
+      // Check if there's a platform between the box and player (player is sheltered)
+      let blocked = false;
+      for (const p of platforms) {
+        if (p.type === "goal") continue;
+        // Platform is above player and below box, and overlaps horizontally
+        if (b.x + b.w > p.x && b.x < p.x + p.w && p.y <= player.y && p.y >= b.y + b.h) {
+          blocked = true; break;
+        }
+      }
+      if (!blocked) {
+        fallingBoxes.splice(i, 1);
+        if (player.shielded) {
+          player.shielded = false;
+          burst(b.x, b.y, "#e67e22", 6);
+          score += 25;
+          playSound("hit");
+        } else { playSound("hit"); loseLife("fallingBox"); return; }
+      }
     }
     // Early crash sound when box is close to landing
     if (!b.crashPlayed && b.vy > 0) {
@@ -612,16 +858,6 @@ function update() {
           b.crashPlayed = true;
           break;
         }
-      }
-    }
-    // Land on platform — stop and become static debris briefly then vanish
-    for (const p of platforms) {
-      if (p.type === "goal") continue;
-      if (b.vy > 0 && b.x + b.w > p.x && b.x < p.x + p.w &&
-          b.y + b.h >= p.y && b.y + b.h <= p.y + 10 + b.vy) {
-        burst(b.x, b.y, "#e67e22", 4);
-        fallingBoxes.splice(i, 1);
-        break;
       }
     }
   }
@@ -680,7 +916,7 @@ function update() {
             burst(b.x, b.y, "#e67e22", 6);
             score += 25;
             playSound("hit");
-          } else { playSound("hit"); loseLife(); return; }
+          } else { playSound("hit"); loseLife("drone"); return; }
           d.state = "leaving";
         }
         // Crash sound near landing
@@ -713,6 +949,86 @@ function update() {
 
       // Remove when fully off screen left
       if (d.x < cameraX - 100) { drones.splice(i, 1); }
+    }
+  }
+
+  // Roaming robots
+  for (const r of robots) {
+    r.stateTimer++;
+
+    if (r.animState === "idle") {
+      // Stationary for 2 frame-lengths (~30 ticks)
+      if (r.stateTimer > 30) { r.animState = "starting"; r.stateTimer = 0; }
+    } else if (r.animState === "starting") {
+      // Transition frame 1
+      r.x += r.speed * r.facing * 0.5;
+      if (r.stateTimer > 10) { r.animState = "moving"; r.stateTimer = 0; }
+    } else if (r.animState === "moving") {
+      r.x += r.speed * r.facing;
+      r.animTimer += 0.12;
+      // Check patrol bounds or approaching pitfall
+      const nextX = r.facing === 1 ? r.x + r.w : r.x;
+      const nearPitfall = pitfalls.some(([gs, ge]) => nextX >= gs - 10 && nextX <= ge + 10);
+      if (r.x > r.originX + r.patrolRange || r.x < r.originX - r.patrolRange || nearPitfall) {
+        r.animState = "stopping"; r.stateTimer = 0;
+      }
+    } else if (r.animState === "stopping") {
+      r.x += r.speed * r.facing * 0.3;
+      if (r.stateTimer > 10) {
+        r.facing *= -1;
+        r.animState = "idle"; r.stateTimer = 0;
+      }
+    }
+
+    // Hit player
+    if (overlap(player, r)) {
+      if (player.shielded) {
+        player.shielded = false;
+        burst(r.x, r.y, "#f1c40f", 6);
+        score += 25;
+        playSound("hit");
+      } else { playSound("hit"); loseLife("robot"); return; }
+    }
+  }
+
+  // Checkpoint
+  if (checkpoint && !checkpoint.activated && overlap(player, checkpoint)) {
+    checkpoint.activated = true;
+    checkpoint.flashTimer = 30;
+    score += 100;
+    playSound("powerup");
+  }
+  if (checkpoint && checkpoint.flashTimer > 0) checkpoint.flashTimer--;
+
+  // Conveyors — push/slow player, flip direction every 20 sec
+  if (conveyors.length > 0) {
+    conveyorTimer++;
+    conveyorAnimTimer += 0.15;
+    if (conveyorTimer >= 1200) {
+      conveyorDir *= -1;
+      conveyorTimer = 0;
+    }
+    // Apply conveyor force if player is on a conveyor
+    if (player.onGround) {
+      const playerFeet = player.y + player.h;
+      for (const c of conveyors) {
+        if (player.x + player.w > c.x && player.x < c.x + c.w &&
+            Math.abs(playerFeet - c.y) < 35) {
+          const pushSpeed = 2.5;
+          let push = 0;
+          if (Math.sign(player.vx) === conveyorDir || player.vx === 0) {
+            push = pushSpeed * conveyorDir;
+          } else {
+            push = pushSpeed * conveyorDir * 0.4;
+          }
+          // Don't push player off the conveyor
+          const newX = player.x + push;
+          if (newX >= c.x - player.w && newX <= c.x + c.w) {
+            player.x = newX;
+          }
+          break;
+        }
+      }
     }
   }
 
@@ -756,11 +1072,32 @@ function applyPowerup(type) {
   }
 }
 
-function loseLife() {
+// Death cause safety tips
+const SAFETY_TIPS = {
+  fallingBox: "When you see a falling box, don't try and catch it! Remember: Let it fall!",
+  drone: "Always be aware of overhead operations. Stay clear of drop zones!",
+  robot: "Never walk in front of moving equipment. Wait for it to pass or use designated crossings!",
+  hazard: "Always watch for floor hazards. Report spills and obstructions immediately!",
+  pitfall: "Stay away from unprotected edges. Always use designated walkways!",
+  fire: "If you see a fire hazard, don't approach it. Pull the alarm and evacuate!",
+  electrical: "Never touch exposed wiring or damaged equipment. Tag it out and report it!",
+  chemical: "Don't handle chemical spills without proper PPE. Alert leadership immediately!",
+  wetfloor: "Slow down on wet surfaces. Report spills right away to prevent slips!",
+};
+let lastDeathCause = "hazard";
+
+function loseLife(cause) {
+  lastDeathCause = cause || "hazard";
   lives--;
   if (lives <= 0) { gameOver(); return; }
-  player.x = 50; player.y = H - 120; player.vx = 0; player.vy = 0; cameraX = 0;
+  if (checkpoint && checkpoint.activated) {
+    player.x = checkpoint.x; player.y = H - 150; player.vx = 0; player.vy = 0;
+    cameraX = Math.max(0, checkpoint.x - W / 3);
+  } else {
+    player.x = 50; player.y = H - 160; player.vx = 0; player.vy = 0; cameraX = 0;
+  }
   drones = []; fallingBoxes = [];
+  for (const r of robots) { r.x = r.originX; r.facing = 1; r.animState = "idle"; r.stateTimer = 0; }
   burst(player.x, player.y, "#e74c3c", 10);
 }
 
@@ -788,7 +1125,7 @@ function nextLevel() {
 
 function advanceLevel() {
   level++;
-  player.x = 50; player.y = H - 120; player.vx = 0; player.vy = 0; cameraX = 0;
+  player.x = 50; player.y = H - 160; player.vx = 0; player.vy = 0; cameraX = 0;
   goalZooming = false; goalZoomTimer = 0; goalZoomScale = 1; goalTarget = null; goalZoomCamX = 0;
   generateLevel(level);
   applyPermanentUpgrades();
@@ -868,9 +1205,16 @@ function drawCinematic() {
 function gameOver() {
   bgMusic.pause();
   playSound("gameover");
-  document.getElementById("final-score").textContent = playerName + " scored " + score + " points on Level " + level + "!";
   saveScore(playerName, score);
+  // Show safety tip screen
+  const tip = SAFETY_TIPS[lastDeathCause] || SAFETY_TIPS.hazard;
+  const tipEl = document.getElementById("safety-tip-text");
+  const scoreEl = document.getElementById("final-score");
+  tipEl.textContent = tip;
+  scoreEl.textContent = playerName + " scored " + score + " points on Level " + level + "!";
   showScreen("gameover");
+  // After 5 seconds, show leaderboard
+  setTimeout(() => renderLeaderboard(), 5000);
 }
 
 function burst(x, y, color, n) {
@@ -880,36 +1224,58 @@ function burst(x, y, color, n) {
 }
 
 // ── Questions ──
+let questionSelection = 0; // keyboard selection index for answers
+
 function triggerQuestion() {
   let pool = QUESTIONS.filter((_, i) => !usedQuestions.has(i));
   if (!pool.length) { usedQuestions.clear(); pool = QUESTIONS; }
   const idx = QUESTIONS.indexOf(pool[Math.floor(Math.random() * pool.length)]);
   usedQuestions.add(idx);
-  currentQuestion = QUESTIONS[idx];
+  const q = QUESTIONS[idx];
+
+  // Shuffle answers, track correct index
+  const shuffled = q.a.map((text, i) => ({ text, correct: i === q.c }));
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  currentQuestion = { q: q.q, answers: shuffled };
+  questionSelection = 0;
 
   document.getElementById("question-text").textContent = currentQuestion.q;
   const div = document.getElementById("answers");
   div.innerHTML = "";
-  currentQuestion.a.forEach((text, i) => {
+  shuffled.forEach((item, i) => {
     const btn = document.createElement("button");
-    btn.textContent = text;
-    btn.addEventListener("click", () => answerQuestion(i, btn));
+    btn.textContent = item.text;
+    btn.addEventListener("click", () => submitAnswer(i));
     div.appendChild(btn);
   });
+  highlightAnswer();
   showScreen("question");
 }
 
-function answerQuestion(idx, btn) {
+function highlightAnswer() {
+  const buttons = document.querySelectorAll("#answers button");
+  buttons.forEach((b, i) => {
+    b.style.outline = i === questionSelection ? "3px solid #2ecc71" : "none";
+    b.style.background = i === questionSelection ? "#1a4a6e" : "";
+  });
+}
+
+function submitAnswer(idx) {
   const buttons = document.querySelectorAll("#answers button");
   buttons.forEach(b => b.disabled = true);
-  if (idx === currentQuestion.c) {
-    btn.classList.add("correct");
+  const chosen = currentQuestion.answers[idx];
+  if (chosen.correct) {
+    buttons[idx].classList.add("correct");
     score += 50;
     burst(player.x, player.y, "#2ecc71", 10);
     playSound("correct");
   } else {
-    btn.classList.add("wrong");
-    buttons[currentQuestion.c].classList.add("correct");
+    buttons[idx].classList.add("wrong");
+    // Highlight the correct one
+    currentQuestion.answers.forEach((a, i) => { if (a.correct) buttons[i].classList.add("correct"); });
     score = Math.max(0, score - 10);
     playSound("wrong");
   }
@@ -1024,6 +1390,47 @@ function draw() {
 
   // Platforms
   const ts = TILE_SIZE;
+
+  // Pitfall depth fill
+  const pitTile = tiles.wallSolid;
+  if (pitTile) {
+    const groundY = H - 40;
+    const pitTop = groundY + 6;
+    for (const [gs, ge] of pitfalls) {
+      for (let x = gs; x < ge; x += ts) {
+        const tw = Math.min(ts, ge - x);
+        for (let y = pitTop; y < H; y += ts) {
+          ctx.drawImage(pitTile, x, y, tw, Math.min(ts, H - y));
+        }
+      }
+    }
+    // Fill under ground-level conveyors only
+    const groundYFill = H - 40;
+    for (const c of conveyors) {
+      if (c.y < groundYFill - 40) continue; // skip floating conveyors
+      const fillTop = c.y + c.h;
+      for (let x = c.x; x < c.x + c.w; x += ts) {
+        const tw = Math.min(ts, c.x + c.w - x);
+        for (let y = fillTop; y < H; y += ts) {
+          ctx.drawImage(pitTile, x, y, tw, Math.min(ts, H - y));
+        }
+      }
+    }
+  }
+
+  // Elevated conveyors (drawn behind ground tiles)
+  if (conveyors.length > 0 && elevConveyImg.complete) {
+    const elevFrame = Math.floor(conveyorAnimTimer) % 3;
+    const groundYC = H - 40;
+    for (const c of conveyors) {
+      if (!c.elevated) continue;
+      for (let cx = c.x; cx < c.x + c.w; cx += 291) {
+        const tw = Math.min(291, c.x + c.w - cx);
+        ctx.drawImage(elevConveyImg, 0, elevFrame * 120, tw, 120, cx, c.y, tw, 120);
+      }
+    }
+  }
+
   for (const p of platforms) {
     if (p.type === "goal") {
       const goalSprite = level <= 3 ? sprites["safety-jd"] : sprites["manager"];
@@ -1054,6 +1461,8 @@ function draw() {
         ctx.fillRect(p.x, p.y, p.w, 3);
       }
     } else {
+      // Skip float platform drawing on conveyor levels
+      if (conveyors.length > 0 && p.type === "float") continue;
       // Check for raised platform sprite (hand-designed levels)
       if (p.raisedSprite && tiles[p.raisedSprite]) {
         const rImg = tiles[p.raisedSprite];
@@ -1093,6 +1502,48 @@ function draw() {
           ctx.fillStyle = "#888";
           ctx.fillRect(p.x, p.y, p.w, 2);
         }
+      }
+    }
+  }
+
+  // Conveyors (drawn on top of ground tiles)
+  if (conveyors.length > 0) {
+    const cImg = conveyorDir === 1 ? conveyRightImg : conveyLeftImg;
+    const elevFrame = Math.floor(conveyorAnimTimer * 0.5) % 3;
+    const groundYC = H - 40;
+
+    // Draw ground-level conveyors on top
+    if (cImg && cImg.complete) {
+      const frame = Math.floor(conveyorAnimTimer) % 8;
+      for (const c of conveyors) {
+        if (c.elevated) continue;
+        for (let cx = c.x; cx < c.x + c.w; cx += 97) {
+          const tw = Math.min(97, c.x + c.w - cx);
+          ctx.drawImage(cImg, 0, frame * 23, tw, 23, cx, c.y, tw, 23);
+        }
+      }
+    }
+
+    // Direction posts in middle of ground conveyors
+    const postImg = conveyorDir === 1 ? postRightImg : postLeftImg;
+    if (postImg && postImg.complete) {
+      for (const c of conveyors) {
+        if (c.elevated) continue;
+        if (c.w >= 200) {
+          const postW = 30;
+          const postH = 85;
+          const px = c.x + c.w / 2 - postW / 2;
+          const py = c.y - postH;
+          ctx.drawImage(postImg, px, py, postW, postH);
+        }
+      }
+    }
+
+    if (conveyorTimer > 1080) {
+      const flash = Math.floor(conveyorTimer / 8) % 2 === 0;
+      if (flash) {
+        ctx.fillStyle = "rgba(255, 200, 0, 0.3)";
+        for (const c of conveyors) { ctx.fillRect(c.x, c.y, c.w, c.h); }
       }
     }
   }
@@ -1155,8 +1606,13 @@ function draw() {
   for (const p of powerups) {
     if (p.collected) continue;
     const bobY = Math.sin(p.bob) * 5;
-    ctx.font = "30px serif";
-    ctx.fillText(p.type.emoji, p.x, p.y + 28 + bobY);
+    const spr = p.type.sprite ? powerupSprites[p.type.sprite] : null;
+    if (spr && spr.complete) {
+      ctx.drawImage(spr, p.x, p.y + bobY, 36, 36);
+    } else {
+      ctx.font = "30px serif";
+      ctx.fillText(p.type.emoji, p.x, p.y + 28 + bobY);
+    }
   }
 
   // Falling boxes
@@ -1241,6 +1697,34 @@ function draw() {
   }
   if (guruNPC && guruImg.complete && !shopVisitedThisLevel) {
     ctx.drawImage(guruImg, guruNPC.x, guruNPC.y - 3, 55, 88);
+  }
+
+  // Roaming robots
+  for (const r of robots) {
+    const frames = r.facing === 1 ? robotRightFrames : robotLeftFrames;
+    let frameIdx = 0;
+    if (r.animState === "idle") frameIdx = 0;
+    else if (r.animState === "starting") frameIdx = 1;
+    else if (r.animState === "moving") frameIdx = 2 + (Math.floor(r.animTimer) % 2);
+    else if (r.animState === "stopping") frameIdx = 4;
+    const img = frames[frameIdx];
+    if (img && img.complete) {
+      ctx.drawImage(img, r.x, r.y + r.h - 128, 64, 128);
+    }
+  }
+
+  // Checkpoint (drawn behind player)
+  if (checkpoint) {
+    const cp = checkpoint;
+    const img = cp.activated ? checkpointBImg : checkpointAImg;
+    if (img && img.complete) {
+      ctx.drawImage(img, cp.x, cp.y, 48, 60);
+    }
+    // Flash animation on activation
+    if (cp.flashTimer > 0 && checkpointFlashImg.complete) {
+      const frame = Math.min(3, 3 - Math.floor(cp.flashTimer / 8));
+      ctx.drawImage(checkpointFlashImg, frame * 48, 0, 48, 48, cp.x - 12, cp.y - 16, 72, 72);
+    }
   }
 
   // Player
@@ -1344,25 +1828,27 @@ function draw() {
 
 // ── Leaderboard ──
 const useFirebase = typeof db !== "undefined";
+const siteCode = new URLSearchParams(window.location.search).get("site") || "global";
+const leaderboardPath = "leaderboard/" + siteCode;
 
 function saveScore(name, sc) {
   if (useFirebase) {
-    // Each play is a separate entry, ranked by score
-    db.ref("leaderboard").push({ name, score: sc, timestamp: Date.now() });
+    db.ref(leaderboardPath).push({ name, score: sc, timestamp: Date.now() });
   } else {
-    const lb = JSON.parse(localStorage.getItem("safetyHeroScores") || "[]");
+    const key = "safetyHeroScores_" + siteCode;
+    const lb = JSON.parse(localStorage.getItem(key) || "[]");
     lb.push({ name, score: sc });
     lb.sort((a, b) => b.score - a.score);
-    localStorage.setItem("safetyHeroScores", JSON.stringify(lb.slice(0, 10)));
+    localStorage.setItem(key, JSON.stringify(lb.slice(0, 10)));
   }
 }
 
 function renderLeaderboard() {
   const medals = ["🥇", "🥈", "🥉"];
   const list = document.getElementById("leaderboard-list");
+  document.getElementById("leaderboard-site").textContent = siteCode.toUpperCase();
 
   function displayScores(entries) {
-    console.log("Leaderboard entries:", entries.length);
     let html = "";
     for (let i = 0; i < entries.length; i++) {
       const prefix = i < 3 ? medals[i] + " " : (i + 1) + ". ";
@@ -1374,14 +1860,15 @@ function renderLeaderboard() {
   if (useFirebase) {
     list.innerHTML = "<li>Loading...</li>";
     showScreen("leaderboard");
-    db.ref("leaderboard").orderByChild("score").limitToLast(10).once("value", function(snap) {
+    db.ref(leaderboardPath).orderByChild("score").limitToLast(10).once("value", function(snap) {
       const entries = [];
       snap.forEach(function(child) { entries.push(child.val()); });
       entries.sort(function(a, b) { return b.score - a.score; });
       displayScores(entries);
     });
   } else {
-    const lb = JSON.parse(localStorage.getItem("safetyHeroScores") || "[]").slice(0, 10);
+    const key = "safetyHeroScores_" + siteCode;
+    const lb = JSON.parse(localStorage.getItem(key) || "[]").slice(0, 10);
     displayScores(lb);
     showScreen("leaderboard");
   }
@@ -1489,17 +1976,156 @@ function applyPermanentUpgrades() {
 }
 
 // ── Game Loop ──
-function loop() {
-  update();
-  if (gameState === "playing" || gameState === "question") {
-    draw();
-  } else if (gameState === "cinematic") {
-    updateCinematic();
-    drawCinematic();
-  } else if (gameState === "shop") {
-    updateShop();
-    drawShop();
+function pollGamepad() {
+  const gp = navigator.getGamepads ? navigator.getGamepads()[0] : null;
+  if (!gp) return;
+  const dz = 0.3;
+  // Only override keys when gamepad input is active (don't clear keyboard inputs)
+  const gpLeft = gp.axes[0] < -dz || gp.buttons[14]?.pressed;
+  const gpRight = gp.axes[0] > dz || gp.buttons[15]?.pressed;
+  const gpUp = gp.buttons[12]?.pressed || gp.axes[1] < -dz;
+  const gpDown = gp.buttons[13]?.pressed || gp.axes[1] > dz;
+  const gpA = gp.buttons[0]?.pressed;
+  const gpB = gp.buttons[1]?.pressed;
+  if (gpLeft) keys["ArrowLeft"] = true;
+  if (gpRight) keys["ArrowRight"] = true;
+  if (gpUp) { keys["ArrowUp"] = true; keys["KeyW"] = true; }
+  if (gpDown) { keys["ArrowDown"] = true; keys["KeyS"] = true; }
+  if (gpA) { keys["Space"] = true; keys["Enter"] = true; }
+  if (gpB) keys["Escape"] = true;
+  // Release gamepad keys when not pressed
+  if (!gpLeft && !keys._kbLeft) keys["ArrowLeft"] = false;
+  if (!gpRight && !keys._kbRight) keys["ArrowRight"] = false;
+  if (!gpUp && !keys._kbUp) { keys["ArrowUp"] = false; keys["KeyW"] = false; }
+  if (!gpDown && !keys._kbDown) { keys["ArrowDown"] = false; keys["KeyS"] = false; }
+  if (!gpA && !keys._kbSpace) { keys["Space"] = false; keys["Enter"] = false; }
+  if (!gpB) keys["Escape"] = false;
+
+  // A button on splash/menu screens
+  if (gp.buttons[0]?.pressed && !pollGamepad._aHeld) {
+    if (gameState === "splash") {
+      document.getElementById("lets-play-btn").click();
+    } else if (gameState === "menu") {
+      menuConfirm();
+    } else if (gameState === "gameover") {
+      const btns = document.querySelectorAll("#gameover-screen button");
+      if (btns[menuIdx]) btns[menuIdx].click();
+    }
   }
+  pollGamepad._aHeld = gp.buttons[0]?.pressed;
+
+  // D-pad navigation for menus (edge-triggered)
+  const upNow = gp.buttons[12]?.pressed || gp.axes[1] < -dz;
+  const downNow = gp.buttons[13]?.pressed || gp.axes[1] > dz;
+  const leftNow = gp.buttons[14]?.pressed || gp.axes[0] < -dz;
+  const rightNow = gp.buttons[15]?.pressed || gp.axes[0] > dz;
+  if (upNow && !pollGamepad._upHeld) menuNav(-1);
+  if (downNow && !pollGamepad._downHeld) menuNav(1);
+  if (leftNow && !pollGamepad._leftHeld && oskActive) { oskIdx = Math.max(0, oskIdx - 1); highlightOSK(); }
+  if (rightNow && !pollGamepad._rightHeld && oskActive) { oskIdx = Math.min(OSK_CHARS.length - 1, oskIdx + 1); highlightOSK(); }
+  pollGamepad._upHeld = upNow;
+  pollGamepad._downHeld = downNow;
+  pollGamepad._leftHeld = leftNow;
+  pollGamepad._rightHeld = rightNow;
+}
+
+// Menu navigation state
+let menuIdx = 0;
+let oskActive = false;
+let oskIdx = 0;
+const OSK_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ⌫✓";
+
+function initOSK() {
+  const osk = document.getElementById("osk");
+  if (osk.children.length > 0) return;
+  osk.style.display = "flex";
+  OSK_CHARS.split("").forEach((ch, i) => {
+    const btn = document.createElement("button");
+    btn.textContent = ch === "⌫" ? "DEL" : ch === "✓" ? "ENTER" : ch;
+    if (ch === "✓") btn.style.background = "#2ecc71";
+    btn.addEventListener("click", () => oskType(ch));
+    osk.appendChild(btn);
+  });
+  highlightOSK();
+}
+
+function oskType(ch) {
+  const input = document.getElementById("player-name");
+  if (ch === "⌫") {
+    input.value = input.value.slice(0, -1);
+  } else if (ch === "✓") {
+    oskActive = false;
+    document.getElementById("osk").style.display = "none";
+    startGame();
+  } else {
+    if (input.value.length < 15) input.value += ch;
+  }
+}
+
+function highlightOSK() {
+  const btns = document.querySelectorAll("#osk button");
+  btns.forEach((b, i) => b.classList.toggle("btn-highlight", i === oskIdx));
+}
+
+function highlightMenu() {
+  if (gameState === "menu") {
+    const btns = document.querySelectorAll("#menu-buttons button");
+    btns.forEach((b, i) => b.classList.toggle("btn-highlight", !oskActive && i === menuIdx));
+    const input = document.getElementById("player-name");
+    input.style.outline = oskActive ? "3px solid #2ecc71" : "";
+  } else if (gameState === "gameover") {
+    const btns = document.querySelectorAll("#gameover-screen button");
+    btns.forEach((b, i) => b.classList.toggle("btn-highlight", i === menuIdx));
+  }
+}
+
+function menuNav(dir) {
+  if (gameState === "menu") {
+    if (oskActive) {
+      // Navigate OSK grid (38 chars, roughly 10 per row)
+      const cols = 10;
+      if (dir === 1 && oskIdx + cols < OSK_CHARS.length) oskIdx += cols;
+      else if (dir === -1 && oskIdx - cols >= 0) oskIdx -= cols;
+      else if (dir === 1) { oskActive = false; menuIdx = 0; }
+      highlightOSK();
+    } else {
+      menuIdx = (menuIdx + dir + 3) % 3; // 0=name input, 1=start, 2=leaderboard
+      if (menuIdx === 0) { oskActive = true; initOSK(); }
+    }
+    highlightMenu();
+  } else if (gameState === "gameover") {
+    const btns = document.querySelectorAll("#gameover-screen button");
+    menuIdx = (menuIdx + dir + btns.length) % btns.length;
+    highlightMenu();
+  }
+}
+
+function menuConfirm() {
+  if (gameState === "menu") {
+    if (oskActive) {
+      oskType(OSK_CHARS[oskIdx]);
+    } else if (menuIdx === 1) {
+      document.getElementById("start-btn").click();
+    } else if (menuIdx === 2) {
+      document.getElementById("leaderboard-btn").click();
+    }
+  }
+}
+
+function loop() {
+  try {
+    pollGamepad();
+    update();
+    if (gameState === "playing" || gameState === "question") {
+      draw();
+    } else if (gameState === "cinematic") {
+      updateCinematic();
+      drawCinematic();
+    } else if (gameState === "shop") {
+      updateShop();
+      drawShop();
+    }
+  } catch(e) { console.error("LOOP ERROR:", e); }
   requestAnimationFrame(loop);
 }
 
